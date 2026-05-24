@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎰 Eat & Win — Restaurant Slot Machine</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>🎰 Eat & Win 🎰</h1>
+            <p class="subtitle">Spin the slots. Let fate decide where you eat.</p>
+        </header>
+
+        <section id="location-section">
+            <button id="btn-locate" class="casino-btn">
+                <span class="btn-text">📍 Use My Location</span>
+            </button>
+            <div class="or-divider">— or —</div>
+            <div class="search-row">
+                <input id="address-input" type="text" placeholder="Enter your address..." autocomplete="off">
+                <button id="btn-search" class="casino-btn small">Go</button>
+            </div>
+            <div id="location-status"></div>
+        </section>
+
+        <section id="machine-section">
+            <div class="machine-frame">
+                <div class="machine-header">🍕 EATS-A-PLENTY 🍔</div>
+                <div class="reel-container">
+                    <div class="reel-window">
+                        <div id="reel-strip"></div>
+                    </div>
+                    <div class="overlay-left"></div>
+                    <div class="overlay-right"></div>
+                </div>
+                <div class="reel-divider"></div>
+                <div id="status-display">Enter a location to get started</div>
+            </div>
+
+            <button id="btn-spin" class="casino-btn spin-btn" disabled>
+                <span class="btn-text">🎲 SPIN! 🎲</span>
+            </button>
+        </section>
+
+        <section id="result-section" class="hidden">
+            <div class="result-card">
+                <div class="winner-badge">🏆 YOU'RE EATING AT 🏆</div>
+                <h2 id="result-name"></h2>
+                <p id="result-cuisine"></p>
+                <p id="result-address"></p>
+                <a id="result-map" href="#" target="_blank" rel="noopener">📍 View on Map</a>
+            </div>
+            <button id="btn-respin" class="casino-btn">
+                <span class="btn-text">🔄 Spin Again!</span>
+            </button>
+        </section>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

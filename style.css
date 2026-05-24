@@ -1,0 +1,308 @@
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(180deg, #1a0a2e 0%, #16213e 50%, #0f3460 100%);
+    min-height: 100vh;
+    color: #f5f5f5;
+    padding: 20px;
+}
+
+#app {
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    color: #ffd700;
+    text-shadow: 0 0 10px #ffd700, 0 0 20px #ff8c00;
+    letter-spacing: 2px;
+}
+
+.subtitle {
+    color: #aaa;
+    font-size: 0.95rem;
+    margin-top: 5px;
+}
+
+/* Location Section */
+#location-section {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.search-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+#address-input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 2px solid #ffd700;
+    border-radius: 8px;
+    background: #1a0a2e;
+    color: #fff;
+    font-size: 1rem;
+    outline: none;
+}
+
+#address-input::placeholder {
+    color: #666;
+}
+
+#address-input:focus {
+    border-color: #ff8c00;
+    box-shadow: 0 0 8px rgba(255, 140, 0, 0.3);
+}
+
+.or-divider {
+    color: #666;
+    margin: 10px 0;
+    font-size: 0.9rem;
+}
+
+#location-status {
+    margin-top: 10px;
+    font-size: 0.85rem;
+    color: #aaa;
+}
+
+/* Casino Button */
+.casino-btn {
+    background: linear-gradient(180deg, #ffd700 0%, #ff8c00 100%);
+    border: 3px solid #b8860b;
+    border-radius: 12px;
+    padding: 14px 28px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #1a0a2e;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.casino-btn:hover:not(:disabled) {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+}
+
+.casino-btn:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.casino-btn:disabled {
+    background: #555;
+    border-color: #444;
+    color: #888;
+    cursor: not-allowed;
+}
+
+.casino-btn.small {
+    padding: 12px 20px;
+    font-size: 1rem;
+}
+
+/* Machine Section */
+#machine-section {
+    margin-bottom: 30px;
+}
+
+.machine-frame {
+    background: linear-gradient(180deg, #2a1a3e 0%, #1a0a2e 100%);
+    border: 3px solid #ffd700;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.2), inset 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+.machine-header {
+    text-align: center;
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #ffd700;
+    text-shadow: 0 0 8px #ff8c00;
+    margin-bottom: 15px;
+    letter-spacing: 3px;
+}
+
+.reel-container {
+    position: relative;
+    overflow: hidden;
+    border: 2px solid #b8860b;
+    border-radius: 8px;
+    background: #0a0a0a;
+}
+
+.reel-window {
+    height: 120px;
+    overflow: hidden;
+    position: relative;
+}
+
+.reel-window::before,
+.reel-window::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 30px;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.reel-window::before {
+    top: 0;
+    background: linear-gradient(to bottom, #0a0a0a 0%, transparent 100%);
+}
+
+.reel-window::after {
+    bottom: 0;
+    background: linear-gradient(to top, #0a0a0a 0%, transparent 100%);
+}
+
+#reel-strip {
+    transition: transform 0.1s ease-out;
+}
+
+.reel-item {
+    height: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+}
+
+.reel-items .name {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #fff;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.reel-items .cuisine {
+    font-size: 0.85rem;
+    color: #ffd700;
+    margin-top: 4px;
+}
+
+.reel-items.blur .name,
+.reel-items.blur .cuisine {
+    filter: blur(2px);
+}
+
+.reel-divider {
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #ffd700, transparent);
+    margin: 15px 0;
+}
+
+#status-display {
+    text-align: center;
+    font-size: 0.9rem;
+    color: #aaa;
+    min-height: 20px;
+}
+
+.spinning #status-display {
+    color: #ffd700;
+    animation: pulse 0.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.spin-btn {
+    margin-top: 20px;
+    width: 100%;
+    font-size: 1.5rem;
+    padding: 18px 28px;
+}
+
+/* Result Section */
+.hidden {
+    display: none;
+}
+
+#result-section {
+    text-align: center;
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.result-card {
+    background: linear-gradient(180deg, #2a1a3e, #1a0a2e);
+    border: 3px solid #ffd700;
+    border-radius: 16px;
+    padding: 30px 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+}
+
+.winner-badge {
+    font-size: 0.9rem;
+    color: #ffd700;
+    letter-spacing: 2px;
+    margin-bottom: 15px;
+}
+
+.result-card h2 {
+    font-size: 1.8rem;
+    color: #fff;
+    margin-bottom: 8px;
+}
+
+.result-card #result-cuisine {
+    color: #ffd700;
+    font-size: 1rem;
+    margin-bottom: 5px;
+}
+
+.result-card #result-address {
+    color: #aaa;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+}
+
+.result-card #result-map {
+    display: inline-block;
+    color: #ffd700;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 8px 16px;
+    border: 2px solid #ffd700;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.result-card #result-map:hover {
+    background: #ffd700;
+    color: #1a0a2e;
+}
+
+#btn-respin {
+    width: 100%;
+}
