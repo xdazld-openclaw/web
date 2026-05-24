@@ -84,8 +84,8 @@ async function searchAddress() {
 async function fetchRestaurants() {
     statusDisplay.textContent = 'Finding nearby restaurants...';
 
-    // Search radius: 2km
-    const radius = 2000;
+    // Search radius from selector
+    const radius = parseInt(document.getElementById('radius-select').value, 10);
 
     const query = `
         [out:json][timeout:30];

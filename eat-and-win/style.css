@@ -73,6 +73,35 @@ header h1 {
     font-size: 0.9rem;
 }
 
+.radius-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.radius-row label {
+    font-size: 0.9rem;
+    color: #aaa;
+}
+
+#radius-select {
+    padding: 8px 12px;
+    border: 2px solid #ffd700;
+    border-radius: 8px;
+    background: #1a0a2e;
+    color: #fff;
+    font-size: 0.9rem;
+    outline: none;
+    cursor: pointer;
+}
+
+#radius-select:focus {
+    border-color: #ff8c00;
+    box-shadow: 0 0 8px rgba(255, 140, 0, 0.3);
+}
+
 #location-status {
     margin-top: 10px;
     font-size: 0.85rem;
@@ -186,7 +215,7 @@ header h1 {
     padding: 10px 20px;
 }
 
-.reel-items .name {
+.reel-item .name {
     font-size: 1.2rem;
     font-weight: bold;
     color: #fff;
@@ -197,14 +226,14 @@ header h1 {
     max-width: 100%;
 }
 
-.reel-items .cuisine {
+.reel-item .cuisine {
     font-size: 0.85rem;
     color: #ffd700;
     margin-top: 4px;
 }
 
-.reel-items.blur .name,
-.reel-items.blur .cuisine {
+.reel-item.blur .name,
+.reel-item.blur .cuisine {
     filter: blur(2px);
 }
 
