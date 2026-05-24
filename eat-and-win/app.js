@@ -9,7 +9,6 @@ const btnLocate = document.getElementById('btn-locate');
 const btnSearch = document.getElementById('btn-search');
 const addressInput = document.getElementById('address-input');
 const btnSpin = document.getElementById('btn-spin');
-const btnRespin = document.getElementById('btn-respin');
 const locationStatus = document.getElementById('location-status');
 const reelStrip = document.getElementById('reel-strip');
 const statusDisplay = document.getElementById('status-display');
@@ -507,12 +506,6 @@ function sleep(ms) {
 /* ===== Event Listeners ===== */
 
 btnSpin.addEventListener('click', spinSlotMachine);
-
-btnRespin.addEventListener('click', () => {
-    resultSection.classList.add('hidden');
-    SoundManager.init();
-    spinSlotMachine();
-});
 
 /* ===== Mute Toggle ===== */
 const btnMute = document.getElementById('btn-mute');
