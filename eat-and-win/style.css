@@ -20,6 +20,7 @@ body {
 header {
     text-align: center;
     margin-bottom: 30px;
+    position: relative;
 }
 
 header h1 {
@@ -33,6 +34,25 @@ header h1 {
     color: #aaa;
     font-size: 0.95rem;
     margin-top: 5px;
+}
+
+.mute-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(255, 215, 0, 0.15);
+    border: 1px solid #ffd700;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+    cursor: pointer;
+    color: #ffd700;
+    transition: all 0.2s ease;
+}
+
+.mute-btn:hover {
+    background: rgba(255, 215, 0, 0.3);
 }
 
 /* Location Section */

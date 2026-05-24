@@ -20,9 +20,144 @@ const resultCuisine = document.getElementById('result-cuisine');
 const resultAddress = document.getElementById('result-address');
 const resultMap = document.getElementById('result-map');
 
+/* ===== Sound & Haptics ===== */
+
+const SoundManager = (() => {
+    let ctx = null;
+
+    function getCtx() {
+        if (!ctx) {
+            ctx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (ctx.state === 'suspended') {
+            ctx.resume();
+        }
+        return ctx;
+    }
+
+    // Short click/tick sound for reel changes
+    function playTick() {
+        try {
+            const c = getCtx();
+            const osc = c.createOscillator();
+            const gain = c.createGain();
+
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(800, c.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(200, c.currentTime + 0.05);
+
+            gain.gain.setValueAtTime(0.08, c.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.05);
+
+            osc.connect(gain);
+            gain.connect(c.destination);
+            osc.start(c.currentTime);
+            osc.stop(c.currentTime + 0.05);
+        } catch (e) { /* Audio not available */ }
+    }
+
+    // Heavy thud for reel stop
+    function playStop() {
+        try {
+            const c = getCtx();
+
+            // Low frequency thud
+            const osc = c.createOscillator();
+            const gain = c.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(150, c.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(40, c.currentTime + 0.15);
+            gain.gain.setValueAtTime(0.2, c.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.15);
+            osc.connect(gain);
+            gain.connect(c.destination);
+            osc.start(c.currentTime);
+            osc.stop(c.currentTime + 0.15);
+
+            // Click component
+            const osc2 = c.createOscillator();
+            const gain2 = c.createGain();
+            osc2.type = 'triangle';
+            osc2.frequency.setValueAtTime(1200, c.currentTime);
+            osc2.frequency.exponentialRampToValueAtTime(100, c.currentTime + 0.08);
+            gain2.gain.setValueAtTime(0.15, c.currentTime);
+            gain2.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.08);
+            osc2.connect(gain2);
+            gain2.connect(c.destination);
+            osc2.start(c.currentTime);
+            osc2.stop(c.currentTime + 0.08);
+        } catch (e) { /* Audio not available */ }
+    }
+
+    // Win jingle - ascending notes
+    function playWin() {
+        try {
+            const c = getCtx();
+            const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+            const now = c.currentTime;
+
+            notes.forEach((freq, i) => {
+                const osc = c.createOscillator();
+                const gain = c.createGain();
+                osc.type = 'triangle';
+                osc.frequency.value = freq;
+
+                const startTime = now + i * 0.12;
+                gain.gain.setValueAtTime(0, startTime);
+                gain.gain.linearRampToValueAtTime(0.15, startTime + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.3);
+
+                osc.connect(gain);
+                gain.connect(c.destination);
+                osc.start(startTime);
+                osc.stop(startTime + 0.3);
+            });
+        } catch (e) { /* Audio not available */ }
+    }
+
+    // Haptic feedback (vibration)
+    function haptic(pattern) {
+        if (navigator.vibrate) {
+            navigator.vibrate(pattern);
+        }
+    }
+
+    return {
+        muted: false,
+
+        // Initialize audio context on user gesture
+        init() { getCtx(); },
+
+        toggleMute() {
+            this.muted = !this.muted;
+            return this.muted;
+        },
+
+        tick() {
+            if (this.muted) return;
+            playTick();
+            haptic(10);
+        },
+
+        stop() {
+            if (this.muted) return;
+            playStop();
+            haptic(50);
+        },
+
+        win() {
+            if (this.muted) return;
+            playWin();
+            haptic([100, 50, 100, 50, 200]);
+        }
+    };
+})();
+
 /* ===== Location ===== */
 
 btnLocate.addEventListener('click', () => {
+    SoundManager.init(); // Initialize audio on first user interaction
+
     if (!navigator.geolocation) {
         locationStatus.textContent = 'Geolocation not supported. Please enter an address.';
         return;
@@ -329,6 +464,9 @@ async function spinSlotMachine() {
             reelStrip.querySelector('.reel-item')?.classList.remove('blur');
         }
 
+        // Sound & haptics on each reel change
+        SoundManager.tick();
+
         await sleep(delay);
     }
 
@@ -336,11 +474,17 @@ async function spinSlotMachine() {
     updateReelItem(winner);
     reelStrip.querySelector('.reel-item')?.classList.remove('blur');
 
+    // Final stop sound
+    SoundManager.stop();
+
     await sleep(500);
 
     // Show result
     machineSection.classList.remove('spinning');
     showResult(winner);
+
+    // Win sound
+    SoundManager.win();
 
     isSpinning = false;
     btnSpin.disabled = false;
@@ -366,5 +510,15 @@ btnSpin.addEventListener('click', spinSlotMachine);
 
 btnRespin.addEventListener('click', () => {
     resultSection.classList.add('hidden');
+    SoundManager.init();
     spinSlotMachine();
 });
+
+/* ===== Mute Toggle ===== */
+const btnMute = document.getElementById('btn-mute');
+if (btnMute) {
+    btnMute.addEventListener('click', () => {
+        const muted = SoundManager.toggleMute();
+        btnMute.textContent = muted ? '🔇' : '🔊';
+    });
+}
