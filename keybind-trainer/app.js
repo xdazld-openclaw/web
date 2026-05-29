@@ -585,12 +585,14 @@ function showCurrentCard() {
       document.getElementById('press-learn-answer').textContent = displayKeybind;
       keyCaptureActive = true;
     } else if (phase === 'scaffold') {
-      // Hidden, but can reveal
+      // Hidden, but can hint then reveal
       document.getElementById('press-scaffold').style.display = '';
       document.getElementById('keys-pressed').textContent = '';
       document.getElementById('press-reveal-hint').textContent = displayKeybind;
       document.getElementById('press-reveal-hint').style.display = 'none';
       document.getElementById('press-reveal-btn').style.display = '';
+      document.getElementById('press-reveal-btn').textContent = '💡 Hint';
+      hintStage = 0;
       keyCaptureActive = true;
     } else {
       // Full recall
@@ -635,6 +637,16 @@ function checkKeyPress(key, pressed) {
 // Track if user revealed the answer this card
 let cardRevealed = false;
 let cardAdvancing = false; // prevent double-trigger from keypress + button click
+let hintStage = 0; // 0 = no hint shown, 1 = hint shown, 2 = fully revealed
+
+function buildHint(keybind) {
+  // Show modifiers, hide the action key: "Ctrl+Alt+?"
+  const parts = keybind.split('+');
+  const modifiers = ['ctrl', 'alt', 'shift', 'meta', 'cmd', 'win', 'double'];
+  const hintParts = parts.filter(p => modifiers.includes(p.toLowerCase()));
+  if (hintParts.length < parts.length) hintParts.push('?');
+  return hintParts.join('+');
+}
 
 // Brief green flash on correct press
 function flashCorrect() {
@@ -659,12 +671,27 @@ document.getElementById('press-done').addEventListener('click', () => {
   handleGrade(hasPress ? 'good' : 'again', false);
 });
 
-// Scaffold phase: "Reveal" button
+// Scaffold phase: two-stage hint → reveal button
 document.getElementById('press-reveal-btn').addEventListener('click', () => {
   if (cardAdvancing) return;
-  cardRevealed = true;
-  document.getElementById('press-reveal-hint').style.display = '';
-  document.getElementById('press-reveal-btn').style.display = 'none';
+  const key = currentSession.keys[currentSession.currentIndex];
+  const resolved = resolveRangeKeybind(key.keybind);
+  const displayKeybind = resolved.display;
+  
+  if (hintStage === 0) {
+    // First click: show hint (modifiers only)
+    const hint = buildHint(displayKeybind);
+    document.getElementById('press-reveal-hint').textContent = hint;
+    document.getElementById('press-reveal-hint').style.display = '';
+    document.getElementById('press-reveal-btn').textContent = '👁️ Reveal';
+    hintStage = 1;
+  } else {
+    // Second click: show full answer
+    cardRevealed = true;
+    document.getElementById('press-reveal-hint').textContent = displayKeybind;
+    document.getElementById('press-reveal-btn').style.display = 'none';
+    hintStage = 2;
+  }
 });
 
 // Scaffold/Recall: "Got it" button (multiple instances across phases)
