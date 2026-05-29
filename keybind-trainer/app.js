@@ -8,6 +8,30 @@ let sessionTotalCount = 0;
 let sessionStreak = 0;
 let sessionXP = 0;
 
+// ============ SETTINGS ============
+const SETTINGS_KEY = 'keybind_settings';
+let settings = {
+  hideNumpad: false,
+};
+
+function loadSettings() {
+  try {
+    const saved = localStorage.getItem(SETTINGS_KEY);
+    if (saved) settings = { ...settings, ...JSON.parse(saved) };
+  } catch {}
+}
+
+function saveSettings() {
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+}
+
+function getActiveKeys() {
+  if (!settings.hideNumpad) return KEYBINDS;
+  return KEYBINDS.filter(k => !k.keybind.toLowerCase().includes('numpad'));
+}
+
+loadSettings();
+
 // ============ KEY CAPTURE (Press It mode) ============
 let activeModifiers = { ctrl: false, alt: false, shift: false };
 let pressedKeys = [];
@@ -156,8 +180,8 @@ function renderDashboard() {
   const today = SR.getTodayStats();
   const dist = SR.getMasteryDistribution();
   const weakest = SR.getWeakestKeys(5);
-  const dueCount = SR.getDueKeys().length;
-  const totalKeys = KEYBINDS.length;
+  const dueCount = SR.getDueKeys(Infinity, getActiveKeys()).length;
+  const totalKeys = getActiveKeys().length;
   
   // Greeting with context
   const hour = new Date().getHours();
@@ -195,7 +219,7 @@ function renderDashboard() {
   const colors = ['#9e9e9e', '#f44336', '#ff9800', '#ffc107', '#8bc34a', '#4caf50'];
   let chartHTML = '<div class="mastery-bars">';
   for (let i = 0; i < 6; i++) {
-    const pct = (dist[i] / KEYBINDS.length) * 100;
+    const pct = (dist[i] / totalKeys) * 100;
     chartHTML += `
       <div class="mastery-bar-row">
         <span class="mastery-label">${labels[i]}</span>
@@ -250,12 +274,14 @@ function resetPractice() {
   document.getElementById('practice-setup').style.display = '';
   hideSessionUI();
   
+  const activeKeys = getActiveKeys();
+  
   const catContainer = document.getElementById('category-buttons');
   catContainer.innerHTML = '';
-  let html = `<button class="btn btn-primary cat-btn" data-category="all">🎯 All (${KEYBINDS.length})</button>`;
-  html += `<button class="btn btn-secondary cat-btn" data-category="due">⚡ Due (${SR.getDueKeys().length})</button>`;
+  let html = `<button class="btn btn-primary cat-btn" data-category="all">🎯 All (${activeKeys.length})</button>`;
+  html += `<button class="btn btn-secondary cat-btn" data-category="due">⚡ Due (${SR.getDueKeys(30, getActiveKeys).length})</button>`;
   for (const cat of CATEGORIES) {
-    const count = KEYBINDS.filter(k => k.category === cat).length;
+    const count = activeKeys.filter(k => k.category === cat).length;
     const icon = CATEGORY_ICONS[cat] || '📝';
     html += `<button class="btn btn-secondary cat-btn" data-category="${cat}">${icon} ${cat} (${count})</button>`;
   }
@@ -275,6 +301,23 @@ function resetPractice() {
       btn.classList.add('btn-primary', 'active');
     });
   });
+  
+  // Settings toggle
+  const settingsContainer = document.getElementById('practice-settings');
+  if (settingsContainer) {
+    settingsContainer.innerHTML = `
+      <label class="setting-toggle">
+        <input type="checkbox" id="hide-numpad-toggle" ${settings.hideNumpad ? 'checked' : ''}>
+        <span class="toggle-switch"></span>
+        <span class="toggle-label">Hide numpad shortcuts</span>
+      </label>
+    `;
+    document.getElementById('hide-numpad-toggle').addEventListener('change', (e) => {
+      settings.hideNumpad = e.target.checked;
+      saveSettings();
+      resetPractice();
+    });
+  }
 }
 
 function startPractice(category, style = null) {
@@ -285,15 +328,16 @@ function startPractice(category, style = null) {
   }
   
   let keys;
+  const activeKeys = getActiveKeys();
   if (category === 'all') {
-    keys = [...KEYBINDS].sort(() => Math.random() - 0.5);
+    keys = [...activeKeys].sort(() => Math.random() - 0.5);
   } else if (category === 'due') {
-    keys = SR.getDueKeys(30);
+    keys = SR.getDueKeys(30, activeKeys);
     if (keys.length === 0) {
-      keys = [...KEYBINDS].sort(() => Math.random() - 0.5).slice(0, 15);
+      keys = [...activeKeys].sort(() => Math.random() - 0.5).slice(0, 15);
     }
   } else {
-    keys = KEYBINDS.filter(k => k.category === category).sort(() => Math.random() - 0.5);
+    keys = activeKeys.filter(k => k.category === category).sort(() => Math.random() - 0.5);
   }
   
   if (keys.length === 0) {
@@ -550,8 +594,9 @@ function endSession() {
 
 // ============ SPACED REVIEW ============
 function renderReviewSetup() {
-  const due = SR.getDueKeys();
-  const dueSoon = SR.getDueSoonKeys();
+  const activeKeys = getActiveKeys();
+  const due = SR.getDueKeys(Infinity, activeKeys);
+  const dueSoon = SR.getDueSoonKeys(activeKeys);
   const learned = SR.getKeysLearned();
   
   document.getElementById('due-count').textContent = due.length;
@@ -564,11 +609,12 @@ function renderReviewSetup() {
 document.getElementById('start-review-btn').addEventListener('click', () => startSpacedReview());
 
 function startSpacedReview() {
-  const due = SR.getDueKeys(25);
+  const activeKeys = getActiveKeys();
+  const due = SR.getDueKeys(25, activeKeys);
   
   if (due.length === 0) {
     // No keys due — suggest learning new ones
-    if (SR.getKeysLearned() < KEYBINDS.length) {
+    if (SR.getKeysLearned() < activeKeys.length) {
       if (confirm('No keys are due for review yet. Practice new keys instead?')) {
         switchView('practice');
         setTimeout(() => startPractice('all', 'press'), 100);
@@ -660,13 +706,14 @@ function renderStats() {
 
 // ============ REFERENCE ============
 function renderReference(filter = '') {
+  const activeKeys = getActiveKeys();
   const filtered = filter 
-    ? KEYBINDS.filter(k => 
+    ? activeKeys.filter(k => 
         k.action.toLowerCase().includes(filter.toLowerCase()) || 
         k.keybind.toLowerCase().includes(filter.toLowerCase()) ||
         k.category.toLowerCase().includes(filter.toLowerCase())
       )
-    : KEYBINDS;
+    : activeKeys;
   
   let html = '';
   let lastCat = '';

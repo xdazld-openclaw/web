@@ -111,10 +111,12 @@ class SpacedRepetition {
   }
 
   // Get keys that are due for review
+  // keys: optional array to filter (defaults to KEYBINDS)
   // Includes: never-reviewed keys (always due) + reviewed keys past their due date
-  getDueKeys(limit = 20) {
+  getDueKeys(limit = 20, keys = null) {
+    const pool = keys || KEYBINDS;
     const now = Date.now();
-    const due = KEYBINDS
+    const due = pool
       .filter(k => {
         const state = this.data.keys[k.id];
         // Never reviewed = always due
@@ -134,10 +136,11 @@ class SpacedRepetition {
   }
 
   // Get keys due soon (within next 24h)
-  getDueSoonKeys() {
+  getDueSoonKeys(keys = null) {
+    const pool = keys || KEYBINDS;
     const now = Date.now();
     const tomorrow = now + 24 * 60 * 60 * 1000;
-    return KEYBINDS.filter(k => {
+    return pool.filter(k => {
       const state = this.data.keys[k.id];
       return state && state.dueDate > now && state.dueDate <= tomorrow;
     });
