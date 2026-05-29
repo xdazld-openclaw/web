@@ -115,15 +115,6 @@ function normalizeKey(e) {
     '`': '`', '~': '`',
     // Browser-mapped keys
     'Backquote': '`',
-    'WakeUp': 'F1', 'AudioVolumeMute': 'MediaVolumeMute',
-    'AudioVolumeDown': 'MediaVolumeDown', 'AudioVolumeUp': 'MediaVolumeUp',
-    'MediaPlayPause': 'MediaPlayPause', 'MediaTrackNext': 'MediaNext',
-    'MediaTrackPrevious': 'MediaPrevious', 'LaunchMail': 'MediaMail',
-    'LaunchApp1': 'LaunchApp1', 'LaunchApp2': 'LaunchApp2',
-    'BrowserBack': 'BrowserBack', 'BrowserForward': 'BrowserForward',
-    'BrowserRefresh': 'BrowserRefresh', 'BrowserStop': 'BrowserStop',
-    'BrowserSearch': 'BrowserSearch', 'BrowserFavorites': 'BrowserFavorites',
-    'BrowserHome': 'BrowserHome',
   };
   if (map[key]) key = map[key];
   
@@ -369,7 +360,7 @@ function resetPractice() {
   const catContainer = document.getElementById('category-buttons');
   catContainer.innerHTML = '';
   let html = `<button class="btn btn-primary cat-btn" data-category="all">🎯 All (${activeKeys.length})</button>`;
-  html += `<button class="btn btn-secondary cat-btn" data-category="due">⚡ Due (${SR.getDueKeys(30, getActiveKeys).length})</button>`;
+  html += `<button class="btn btn-secondary cat-btn" data-category="due">⚡ Due (${SR.getDueKeys(30, getActiveKeys()).length})</button>`;
   for (const cat of CATEGORIES) {
     const count = activeKeys.filter(k => k.category === cat).length;
     const icon = CATEGORY_ICONS[cat] || '📝';
