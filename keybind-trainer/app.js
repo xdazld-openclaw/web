@@ -33,6 +33,45 @@ function getActiveKeys() {
 
 loadSettings();
 
+// ============ AUDIO ============
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+
+function playCorrectJingle() {
+  try {
+    if (!audioCtx) audioCtx = new AudioCtx();
+    // Two-tone ascending chime
+    const now = audioCtx.currentTime;
+    [523.25, 659.25].forEach((freq, i) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.15, now + i * 0.1);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.2);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start(now + i * 0.1);
+      osc.stop(now + i * 0.1 + 0.2);
+    });
+  } catch {}
+}
+
+function playWrongBuzz() {
+  try {
+    if (!audioCtx) audioCtx = new AudioCtx();
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'square';
+    osc.frequency.value = 150;
+    gain.gain.setValueAtTime(0.08, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(now);
+    osc.stop(now + 0.2);
+  } catch {}
+}
+
 // ============ KEY CAPTURE (Press It mode) ============
 let activeModifiers = { ctrl: false, alt: false, shift: false };
 let pressedKeys = [];
@@ -46,6 +85,12 @@ function normalizeKey(e) {
   if (e.key === 'Meta') return null;
   
   let key = e.key;
+  
+  // Fallback: when e.key is 'Unidentified' (e.g. Space with modifiers), use e.code
+  if (key === 'Unidentified' && e.code) {
+    key = e.code;
+  }
+  
   if (key.length === 1) key = key.toUpperCase();
   
   // Map common keys
@@ -55,6 +100,16 @@ function normalizeKey(e) {
     'ArrowLeft': 'Left', 'ArrowRight': 'Right', 'Home': 'Home', 'End': 'End',
     'PageUp': 'PageUp', 'PageDown': 'PageDown', 'Insert': 'Insert',
     '`': '`', '~': '`',
+    // Browser-mapped keys
+    'WakeUp': 'F1', 'AudioVolumeMute': 'MediaVolumeMute',
+    'AudioVolumeDown': 'MediaVolumeDown', 'AudioVolumeUp': 'MediaVolumeUp',
+    'MediaPlayPause': 'MediaPlayPause', 'MediaTrackNext': 'MediaNext',
+    'MediaTrackPrevious': 'MediaPrevious', 'LaunchMail': 'MediaMail',
+    'LaunchApp1': 'LaunchApp1', 'LaunchApp2': 'LaunchApp2',
+    'BrowserBack': 'BrowserBack', 'BrowserForward': 'BrowserForward',
+    'BrowserRefresh': 'BrowserRefresh', 'BrowserStop': 'BrowserStop',
+    'BrowserSearch': 'BrowserSearch', 'BrowserFavorites': 'BrowserFavorites',
+    'BrowserHome': 'BrowserHome',
   };
   if (map[key]) key = map[key];
   
@@ -341,6 +396,23 @@ function resetPractice() {
   }
 }
 
+// Pick a random number for range keybinds like Alt+[0-9]
+let currentRangeTarget = null;
+
+function resolveRangeKeybind(keybind) {
+  // Match patterns like [0-9], [1-9], [0-4], etc.
+  const match = keybind.match(/\[(\d)-(\d)\]/);
+  if (!match) return { display: keybind, target: null };
+  const lo = parseInt(match[1]);
+  const hi = parseInt(match[2]);
+  const num = lo + Math.floor(Math.random() * (hi - lo + 1));
+  currentRangeTarget = String(num);
+  return {
+    display: keybind.replace(/\[\d-\d\]/, String(num)),
+    target: String(num),
+  };
+}
+
 function startPractice(category, style = null) {
   // Determine style: use pressed style button, or parameter, or default 'press'
   if (!style) {
@@ -425,10 +497,15 @@ function showCurrentCard() {
   activeModifiers = { ctrl: false, alt: false, shift: false };
   cardRevealed = false;
   cardAdvancing = false;
+  currentRangeTarget = null;
   
   if (currentSession.style === 'press') {
     document.getElementById('card-question').textContent = key.action;
     document.getElementById('press-zone').style.display = '';
+    
+    // Handle range keybinds like Alt+[0-9]
+    const resolved = resolveRangeKeybind(key.keybind);
+    const displayKeybind = resolved.display;
     
     // Show phase badge
     const phaseLabels = { learn: '📖 Learn', scaffold: '✏️ Practice', recall: '🎯 Test' };
@@ -437,13 +514,13 @@ function showCurrentCard() {
     if (phase === 'learn') {
       // Show the answer — user just needs to press it
       document.getElementById('press-learn').style.display = '';
-      document.getElementById('press-learn-answer').textContent = key.keybind;
+      document.getElementById('press-learn-answer').textContent = displayKeybind;
       keyCaptureActive = true;
     } else if (phase === 'scaffold') {
       // Hidden, but can reveal
       document.getElementById('press-scaffold').style.display = '';
       document.getElementById('keys-pressed').textContent = '';
-      document.getElementById('press-reveal-hint').textContent = key.keybind;
+      document.getElementById('press-reveal-hint').textContent = displayKeybind;
       document.getElementById('press-reveal-hint').style.display = 'none';
       document.getElementById('press-reveal-btn').style.display = '';
       keyCaptureActive = true;
@@ -454,6 +531,7 @@ function showCurrentCard() {
       keyCaptureActive = true;
     }
   } else if (currentSession.style === 'flashcard') {
+    const resolved = resolveRangeKeybind(key.keybind);
     document.getElementById('card-question').textContent = key.action;
     document.getElementById('flashcard-answer').style.display = '';
     document.getElementById('reveal-answer').style.display = '';
@@ -467,13 +545,20 @@ function showCurrentCard() {
 function checkKeyPress(key, pressed) {
   if (!pressed) return false;
   const normalize = (s) => s.toLowerCase().replace(/\s/g, '').replace(/\+/g, '');
-  const alternatives = key.keybind.split('/').map(s => s.trim());
+  
+  // Handle resolved range keybinds (e.g., Alt+[0-9] → Alt+5)
+  let keybind = key.keybind;
+  if (currentRangeTarget) {
+    keybind = keybind.replace(/\[\d-\d\]/, currentRangeTarget);
+  }
+  
+  const alternatives = keybind.split('/').map(s => s.trim());
   for (const alt of alternatives) {
     if (normalize(pressed) === normalize(alt)) return true;
     const altParts = alt.split('/').map(s => s.trim());
     if (altParts.some(p => normalize(pressed) === normalize(p))) return true;
   }
-  const target = normalize(key.keybind.split('/')[0].trim());
+  const target = normalize(keybind.split('/')[0].trim());
   const userInput = normalize(pressed);
   if (levenshteinSimilarity(target, userInput) > 0.85) return true;
   return false;
@@ -486,6 +571,7 @@ let cardAdvancing = false; // prevent double-trigger from keypress + button clic
 // Brief green flash on correct press
 function flashCorrect() {
   cardAdvancing = true;
+  playCorrectJingle();
   const zone = document.getElementById('press-zone');
   if (zone) {
     zone.style.borderColor = 'var(--accent-success)';
@@ -549,7 +635,8 @@ document.querySelectorAll('#press-skip').forEach(btn => {
 // ============ FLASHCARD MODE ============
 document.getElementById('reveal-answer').addEventListener('click', () => {
   const key = currentSession.keys[currentSession.currentIndex];
-  document.getElementById('correct-answer').textContent = key.keybind;
+  const resolved = resolveRangeKeybind(key.keybind);
+  document.getElementById('correct-answer').textContent = resolved.display;
   document.getElementById('answer-reveal').style.display = '';
   document.getElementById('reveal-answer').style.display = 'none';
 });
@@ -580,6 +667,7 @@ function handleGrade(grade, wasRevealed = false) {
     SR.addXP(xp);
   } else {
     sessionStreak = 0;
+    playWrongBuzz();
   }
   
   SR.review(key.id, grade, wasRevealed);
