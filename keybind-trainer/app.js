@@ -562,7 +562,7 @@ function showCurrentCard() {
   const fb = document.getElementById('press-learn-feedback');
   if (fb) { fb.textContent = ''; fb.style.display = 'none'; }
   pressedKeys = [];
-  activeModifiers = { ctrl: false, alt: false, shift: false };
+  // Don't reset activeModifiers — user may still be holding modifiers across cards
   cardRevealed = false;
   cardAdvancing = false;
   currentRangeTarget = null;
