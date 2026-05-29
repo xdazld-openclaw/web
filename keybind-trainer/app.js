@@ -95,7 +95,8 @@ function normalizeKey(e) {
   
   // Map common keys
   const map = {
-    ' ': 'Space', 'Escape': 'Esc', 'Delete': 'Delete', 'Backspace': 'Backspace',
+    ' ': 'Space', 'Space': 'Space',
+    'Escape': 'Esc', 'Delete': 'Delete', 'Backspace': 'Backspace',
     'Enter': 'Enter', 'Tab': 'Tab', 'ArrowUp': 'Up', 'ArrowDown': 'Down',
     'ArrowLeft': 'Left', 'ArrowRight': 'Right', 'Home': 'Home', 'End': 'End',
     'PageUp': 'PageUp', 'PageDown': 'PageDown', 'Insert': 'Insert',
