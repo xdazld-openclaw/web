@@ -97,6 +97,15 @@ function onKeydown(e) {
   if (key) {
     pressedKeys.push(key);
     updatePressDisplay();
+    
+    // Auto-check: did they press the right keybind?
+    const target = currentSession.keys[currentSession.currentIndex];
+    const pressed = buildKeybindString();
+    if (checkKeyPress(target, pressed)) {
+      // Brief flash of green, then advance
+      flashCorrect();
+      setTimeout(() => handleGrade('good', cardRevealed), 300);
+    }
   }
 }
 
@@ -415,6 +424,7 @@ function showCurrentCard() {
   pressedKeys = [];
   activeModifiers = { ctrl: false, alt: false, shift: false };
   cardRevealed = false;
+  cardAdvancing = false;
   
   if (currentSession.style === 'press') {
     document.getElementById('card-question').textContent = key.action;
@@ -471,10 +481,25 @@ function checkKeyPress(key, pressed) {
 
 // Track if user revealed the answer this card
 let cardRevealed = false;
+let cardAdvancing = false; // prevent double-trigger from keypress + button click
+
+// Brief green flash on correct press
+function flashCorrect() {
+  cardAdvancing = true;
+  const zone = document.getElementById('press-zone');
+  if (zone) {
+    zone.style.borderColor = 'var(--accent-success)';
+    zone.style.boxShadow = '0 0 12px rgba(14, 165, 100, 0.4)';
+    setTimeout(() => {
+      zone.style.borderColor = '';
+      zone.style.boxShadow = '';
+    }, 300);
+  }
+}
 
 // Learn phase: "Done" button — any keypress counts (building muscle memory)
 document.getElementById('press-done').addEventListener('click', () => {
-  if (!currentSession) return;
+  if (!currentSession || cardAdvancing) return;
   // If they pressed at least a key, count it as good
   const hasPress = pressedKeys.length > 0;
   handleGrade(hasPress ? 'good' : 'again', false);
@@ -482,6 +507,7 @@ document.getElementById('press-done').addEventListener('click', () => {
 
 // Scaffold phase: "Reveal" button
 document.getElementById('press-reveal-btn').addEventListener('click', () => {
+  if (cardAdvancing) return;
   cardRevealed = true;
   document.getElementById('press-reveal-hint').style.display = '';
   document.getElementById('press-reveal-btn').style.display = 'none';
@@ -490,7 +516,7 @@ document.getElementById('press-reveal-btn').addEventListener('click', () => {
 // Scaffold/Recall: "Got it" button (multiple instances across phases)
 document.querySelectorAll('#press-correct').forEach(btn => {
   btn.addEventListener('click', () => {
-    if (!currentSession) return;
+    if (!currentSession || cardAdvancing) return;
     const key = currentSession.keys[currentSession.currentIndex];
     const pressed = buildKeybindString();
     const isCorrect = checkKeyPress(key, pressed);
@@ -501,6 +527,7 @@ document.querySelectorAll('#press-correct').forEach(btn => {
 // Wrong button (multiple instances across phases)
 document.querySelectorAll('#press-wrong').forEach(btn => {
   btn.addEventListener('click', () => {
+    if (cardAdvancing) return;
     handleGrade('again', cardRevealed);
   });
 });
@@ -508,7 +535,7 @@ document.querySelectorAll('#press-wrong').forEach(btn => {
 // Skip button (multiple instances across phases)
 document.querySelectorAll('#press-skip').forEach(btn => {
   btn.addEventListener('click', () => {
-    if (!currentSession) return;
+    if (!currentSession || cardAdvancing) return;
     const key = currentSession.keys[currentSession.currentIndex];
     SR.initKey(key.id);
     sessionTotalCount++;
