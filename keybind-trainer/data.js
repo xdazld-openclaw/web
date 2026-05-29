@@ -37,7 +37,7 @@ const KEYBINDS = [
   { id: "super_method", category: "Navigate From Symbols", action: "Super method", keybind: "Ctrl+U" },
   { id: "implementations", category: "Navigate From Symbols", action: "Implementation(s)", keybind: "Ctrl+Alt+B" },
   { id: "find_usages_1", category: "Navigate From Symbols", action: "Find usages", keybind: "Alt+F7" },
-  { id: "find_usages_2", category: "Navigate From Symbols", action: "Find usages in file", keybind: "Ctrl+F7" },
+  { id: "find_usages_2", category: "Navigate From Symbols", action: "Find usages in file", keybind: "Ctrl+F7", kde: true },
   { id: "highlight_usages", category: "Navigate From Symbols", action: "Highlight usages in file", keybind: "Ctrl+Shift+F7" },
   { id: "show_usages", category: "Navigate From Symbols", action: "Show usages", keybind: "Ctrl+Alt+F7" },
 
