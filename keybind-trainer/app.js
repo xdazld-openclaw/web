@@ -166,10 +166,11 @@ function onKeydown(e) {
   if (e.key === 'Alt') { activeModifiers.alt = true; e.preventDefault(); return; }
   if (e.key === 'Shift') {
     e.preventDefault();
-    // Double Shift detection: two Shift presses within 500ms
+    // Double Shift detection: two distinct Shift presses (released between) within 500ms
     const now = Date.now();
-    if (now - lastShiftPressTime < DOUBLE_TAP_MS) {
-      activeModifiers.shift = false; // Clear so buildKeybindString returns just "DoubleShift"
+    if (!activeModifiers.shift && now - lastShiftPressTime < DOUBLE_TAP_MS) {
+      // Genuine double-tap (Shift was released between presses)
+      activeModifiers.shift = false;
       pressedKeys.push('DoubleShift');
       updatePressDisplay();
       checkAutoAdvance();
