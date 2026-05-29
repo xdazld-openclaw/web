@@ -158,10 +158,6 @@ function buildKeybindString() {
 function onKeydown(e) {
   if (!keyCaptureActive || !currentSession || currentSession.style !== 'press') return;
   
-  // Track modifiers
-  if (e.key === 'Control' || e.key === 'Meta') { activeModifiers.ctrl = true; e.preventDefault(); return; }
-  if (e.key === 'Alt') { activeModifiers.alt = true; e.preventDefault(); return; }
-  if (e.key === 'Shift') {
   // Ignore Fn key — fires WakeUp before the actual F[1-12] key
   if (e.key === 'WakeUp') { e.preventDefault(); return; }
   
