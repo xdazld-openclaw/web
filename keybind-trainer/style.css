@@ -419,6 +419,34 @@ header {
   font-size: 0.9rem;
 }
 
+/* Learn phase: answer shown upfront */
+.press-display.press-answer-shown {
+  border-color: var(--accent-primary);
+  background: rgba(84, 138, 247, 0.08);
+}
+
+.press-keybind-answer {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--accent-secondary);
+  letter-spacing: 1px;
+}
+
+/* Scaffold reveal hint */
+.press-reveal-hint {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--accent-warning);
+  margin-left: 12px;
+  padding: 4px 10px;
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px dashed var(--accent-warning);
+  border-radius: var(--radius-sm);
+  animation: fadeIn 0.2s ease;
+}
+
 .press-browser-note {
   background: rgba(247, 84, 100, 0.1);
   border: 1px solid var(--accent-danger);

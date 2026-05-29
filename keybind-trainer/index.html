@@ -61,17 +61,45 @@
       <div class="answer-area" id="answer-area">
         <!-- PRESS mode: capture actual keypresses -->
         <div id="press-zone" style="display:none;">
-          <div class="press-instructions">Press the keybind on your keyboard</div>
-          <div class="press-display" id="press-display">
-            <span class="keys-pressed" id="keys-pressed"></span>
+          <!-- Learn phase: answer shown upfront -->
+          <div id="press-learn" style="display:none;">
+            <div class="press-instructions">Press this keybind to learn it</div>
+            <div class="press-display press-answer-shown">
+              <span class="keys-pressed press-keybind-answer" id="press-learn-answer"></span>
+            </div>
+            <div class="press-buttons">
+              <button class="btn btn-secondary" id="press-skip">Skip →</button>
+              <button class="btn btn-success" id="press-done">✅ Pressed It</button>
+            </div>
+          </div>
+          <!-- Scaffold phase: hidden, tap to reveal -->
+          <div id="press-scaffold" style="display:none;">
+            <div class="press-instructions">Press the keybind — tap to reveal if stuck</div>
+            <div class="press-display" id="press-scaffold-display">
+              <span class="keys-pressed" id="keys-pressed"></span>
+              <span class="press-reveal-hint" id="press-reveal-hint" style="display:none;"></span>
+            </div>
+            <div class="press-buttons">
+              <button class="btn btn-secondary" id="press-reveal-btn">👁️ Reveal</button>
+              <button class="btn btn-secondary" id="press-skip">Skip →</button>
+              <button class="btn btn-success" id="press-correct">✅ Got it</button>
+              <button class="btn btn-danger" id="press-wrong">❌ Missed</button>
+            </div>
+          </div>
+          <!-- Recall phase: no hints -->
+          <div id="press-recall" style="display:none;">
+            <div class="press-instructions">Press the keybind from memory</div>
+            <div class="press-display">
+              <span class="keys-pressed" id="keys-pressed"></span>
+            </div>
+            <div class="press-buttons">
+              <button class="btn btn-secondary" id="press-skip">Skip →</button>
+              <button class="btn btn-success" id="press-correct">✅ Got it</button>
+              <button class="btn btn-danger" id="press-wrong">❌ Missed</button>
+            </div>
           </div>
           <div class="press-browser-note" id="press-browser-note" style="display:none;">
-            ⚠️ Browser intercepted that shortcut. Use the <strong>Flashcard</strong> mode for this one, or try in a different browser.
-          </div>
-          <div class="press-buttons">
-            <button class="btn btn-secondary" id="press-skip">Skip →</button>
-            <button class="btn btn-success" id="press-correct">✅ Got it</button>
-            <button class="btn btn-danger" id="press-wrong">❌ Missed</button>
+            ⚠️ Browser intercepted that shortcut. Use the <strong>Flashcard</strong> mode for this one.
           </div>
         </div>
 

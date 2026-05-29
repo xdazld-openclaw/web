@@ -333,6 +333,7 @@ function showCurrentCard() {
   
   const key = currentSession.keys[currentSession.currentIndex];
   const total = currentSession.keys.length;
+  const phase = SR.getPhase(key.id);
   
   document.getElementById('current-card-num').textContent = currentSession.currentIndex + 1;
   document.getElementById('session-correct').textContent = sessionCorrectCount;
@@ -347,16 +348,43 @@ function showCurrentCard() {
   
   // Reset all modes
   document.getElementById('press-zone').style.display = 'none';
+  document.getElementById('press-learn').style.display = 'none';
+  document.getElementById('press-scaffold').style.display = 'none';
+  document.getElementById('press-recall').style.display = 'none';
   document.getElementById('flashcard-answer').style.display = 'none';
   document.getElementById('press-browser-note').style.display = 'none';
+  document.getElementById('press-reveal-hint').style.display = 'none';
   pressedKeys = [];
   activeModifiers = { ctrl: false, alt: false, shift: false };
+  cardRevealed = false;
   
   if (currentSession.style === 'press') {
     document.getElementById('card-question').textContent = key.action;
     document.getElementById('press-zone').style.display = '';
-    document.getElementById('keys-pressed').textContent = '';
-    keyCaptureActive = true;
+    
+    // Show phase badge
+    const phaseLabels = { learn: '📖 Learn', scaffold: '✏️ Practice', recall: '🎯 Test' };
+    document.getElementById('card-hint').textContent = phaseLabels[phase] || '';
+    
+    if (phase === 'learn') {
+      // Show the answer — user just needs to press it
+      document.getElementById('press-learn').style.display = '';
+      document.getElementById('press-learn-answer').textContent = key.keybind;
+      keyCaptureActive = true;
+    } else if (phase === 'scaffold') {
+      // Hidden, but can reveal
+      document.getElementById('press-scaffold').style.display = '';
+      document.getElementById('keys-pressed').textContent = '';
+      document.getElementById('press-reveal-hint').textContent = key.keybind;
+      document.getElementById('press-reveal-hint').style.display = 'none';
+      document.getElementById('press-reveal-btn').style.display = '';
+      keyCaptureActive = true;
+    } else {
+      // Full recall
+      document.getElementById('press-recall').style.display = '';
+      document.getElementById('keys-pressed').textContent = '';
+      keyCaptureActive = true;
+    }
   } else if (currentSession.style === 'flashcard') {
     document.getElementById('card-question').textContent = key.action;
     document.getElementById('flashcard-answer').style.display = '';
@@ -370,50 +398,69 @@ function showCurrentCard() {
 // Check if pressed keybind matches the target
 function checkKeyPress(key, pressed) {
   if (!pressed) return false;
-  
-  // Normalize both for comparison
   const normalize = (s) => s.toLowerCase().replace(/\s/g, '').replace(/\+/g, '');
-  
-  // Handle / alternatives in target
   const alternatives = key.keybind.split('/').map(s => s.trim());
-  
-  // Check if pressed matches any alternative
   for (const alt of alternatives) {
     if (normalize(pressed) === normalize(alt)) return true;
-    // Also check if pressed matches one part of a "/" alternative
     const altParts = alt.split('/').map(s => s.trim());
     if (altParts.some(p => normalize(pressed) === normalize(p))) return true;
   }
-  
-  // Fuzzy match for close attempts
   const target = normalize(key.keybind.split('/')[0].trim());
   const userInput = normalize(pressed);
   if (levenshteinSimilarity(target, userInput) > 0.85) return true;
-  
   return false;
 }
 
-document.getElementById('press-correct').addEventListener('click', () => {
+// Track if user revealed the answer this card
+let cardRevealed = false;
+
+// Learn phase: "Done" button
+document.getElementById('press-done').addEventListener('click', () => {
   if (!currentSession) return;
   const key = currentSession.keys[currentSession.currentIndex];
   const pressed = buildKeybindString();
   const isCorrect = checkKeyPress(key, pressed);
-  handleGrade(isCorrect ? 'good' : 'again');
+  // In learn phase, just pressing anything = learning (generous)
+  handleGrade(isCorrect ? 'good' : 'again', false);
 });
 
-document.getElementById('press-wrong').addEventListener('click', () => {
-  handleGrade('again');
+// Scaffold phase: "Reveal" button
+document.getElementById('press-reveal-btn').addEventListener('click', () => {
+  cardRevealed = true;
+  document.getElementById('press-reveal-hint').style.display = '';
+  document.getElementById('press-reveal-btn').style.display = 'none';
 });
 
-document.getElementById('press-skip').addEventListener('click', () => {
-  if (!currentSession) return;
-  const key = currentSession.keys[currentSession.currentIndex];
-  SR.initKey(key.id);
-  // Skip: treat as neutral (no XP, no streak change, but still record review)
-  sessionTotalCount++;
-  SR.review(key.id, 'hard');
-  currentSession.currentIndex++;
-  showCurrentCard();
+// Scaffold/Recall: "Got it" button (multiple instances across phases)
+document.querySelectorAll('#press-correct').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (!currentSession) return;
+    const key = currentSession.keys[currentSession.currentIndex];
+    const pressed = buildKeybindString();
+    const isCorrect = checkKeyPress(key, pressed);
+    handleGrade(isCorrect ? 'good' : 'again', cardRevealed);
+  });
+});
+
+// Wrong button (multiple instances across phases)
+document.querySelectorAll('#press-wrong').forEach(btn => {
+  btn.addEventListener('click', () => {
+    handleGrade('again', cardRevealed);
+  });
+});
+
+// Skip button (multiple instances across phases)
+document.querySelectorAll('#press-skip').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (!currentSession) return;
+    const key = currentSession.keys[currentSession.currentIndex];
+    SR.initKey(key.id);
+    sessionTotalCount++;
+    SR.review(key.id, 'hard', cardRevealed);
+    cardRevealed = false;
+    currentSession.currentIndex++;
+    showCurrentCard();
+  });
 });
 
 // ============ FLASHCARD MODE ============
@@ -430,7 +477,7 @@ document.addEventListener('click', (e) => {
   }
 });
 
-function handleGrade(grade) {
+function handleGrade(grade, wasRevealed = false) {
   if (!currentSession) return;
   const key = currentSession.keys[currentSession.currentIndex];
   SR.initKey(key.id);
@@ -442,7 +489,8 @@ function handleGrade(grade) {
     sessionStreak++;
     if (sessionStreak > sessionBestStreak) sessionBestStreak = sessionStreak;
     
-    let xp = grade === 'easy' ? 15 : 10;
+    // Less XP for revealed answers (you needed the hint)
+    let xp = wasRevealed ? 5 : (grade === 'easy' ? 15 : 10);
     if (sessionStreak >= 10) xp += 5;
     else if (sessionStreak >= 5) xp += 3;
     sessionXP += xp;
@@ -451,9 +499,10 @@ function handleGrade(grade) {
     sessionStreak = 0;
   }
   
-  SR.review(key.id, grade);
+  SR.review(key.id, grade, wasRevealed);
   SR.data.bestStreak = Math.max(SR.data.bestStreak, sessionBestStreak);
   
+  cardRevealed = false;
   currentSession.currentIndex++;
   showCurrentCard();
 }

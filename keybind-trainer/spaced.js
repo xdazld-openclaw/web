@@ -51,16 +51,30 @@ class SpacedRepetition {
         lastResult: null,
         timesReviewed: 0,
         timesCorrect: 0,
+        timesSeen: 0,       // how many times answer was shown
+        timesRevealed: 0,    // how many times user needed to reveal
       };
     }
   }
 
+  // Learning phase for a key:
+  // "learn" (show answer) → "scaffold" (show with reveal button) → "recall" (no hint)
+  getPhase(id) {
+    const state = this.data.keys[id];
+    if (!state) return 'learn';     // never seen — show answer
+    if (state.timesSeen < 2) return 'learn';
+    if (state.timesReviewed < 4) return 'scaffold';
+    return 'recall';
+  }
+
   // SM-2 algorithm: update after a review
   // grade: "again" (0), "hard" (1), "good" (2), "easy" (3)
-  review(id, grade) {
+  review(id, grade, wasRevealed = false) {
     this.initKey(id);
     const k = this.data.keys[id];
     k.timesReviewed++;
+    if (wasRevealed) k.timesRevealed++;
+    else k.timesSeen++;
 
     const qualityMap = { again: 0, hard: 1, good: 2, easy: 3 };
     const quality = qualityMap[grade] ?? 2;
@@ -68,7 +82,7 @@ class SpacedRepetition {
 
     if (grade === "again") {
       k.repetition = 0;
-      k.interval = 1; // 1 minute (review again soon)
+      k.interval = 1; // 1 day (review again soon)
       k.easeFactor = Math.max(1.3, k.easeFactor - 0.2);
     } else {
       if (k.repetition === 0) {
@@ -85,10 +99,8 @@ class SpacedRepetition {
       k.easeFactor = Math.max(1.3, k.easeFactor + (gradeBonus[grade] || 0));
     }
 
-    // Set due date (interval in days, but "again" is 1 min)
-    const intervalMs = grade === "again" 
-      ? 1 * 60 * 1000 // 1 minute
-      : k.interval * 24 * 60 * 60 * 1000; // days
+    // Set due date
+    const intervalMs = k.interval * 24 * 60 * 60 * 1000; // days
     k.dueDate = Date.now() + intervalMs;
 
     if (quality >= 2) {
