@@ -27,8 +27,6 @@ function saveSettings() {
 
 function getActiveKeys() {
   let keys = KEYBINDS;
-  // Always skip browser-conflicting shortcuts (Edge/Chrome intercept these)
-  keys = keys.filter(k => !k.conflicts);
   if (!settings.hideNumpad) return keys;
   return keys.filter(k => !k.keybind.toLowerCase().includes('numpad'));
 }
@@ -110,7 +108,18 @@ function onKeyup(e) {
 
 function updatePressDisplay() {
   const display = buildKeybindString();
-  document.getElementById('keys-pressed').textContent = display || '...';
+  const el = document.getElementById('keys-pressed');
+  if (el) el.textContent = display || '...';
+  // Also update Learn phase feedback if visible
+  const fb = document.getElementById('press-learn-feedback');
+  if (fb) {
+    if (display && display !== 'Ctrl' && display !== 'Alt' && display !== 'Shift' && display !== 'Ctrl+Alt' && display !== 'Ctrl+Shift' && display !== 'Alt+Shift' && display !== 'Ctrl+Alt+Shift') {
+      fb.textContent = '→ ' + display;
+      fb.style.display = '';
+    } else {
+      fb.style.display = 'none';
+    }
+  }
 }
 
 document.addEventListener('keydown', onKeydown);
@@ -401,6 +410,8 @@ function showCurrentCard() {
   document.getElementById('flashcard-answer').style.display = 'none';
   document.getElementById('press-browser-note').style.display = 'none';
   document.getElementById('press-reveal-hint').style.display = 'none';
+  const fb = document.getElementById('press-learn-feedback');
+  if (fb) { fb.textContent = ''; fb.style.display = 'none'; }
   pressedKeys = [];
   activeModifiers = { ctrl: false, alt: false, shift: false };
   cardRevealed = false;
@@ -461,14 +472,12 @@ function checkKeyPress(key, pressed) {
 // Track if user revealed the answer this card
 let cardRevealed = false;
 
-// Learn phase: "Done" button
+// Learn phase: "Done" button — any keypress counts (building muscle memory)
 document.getElementById('press-done').addEventListener('click', () => {
   if (!currentSession) return;
-  const key = currentSession.keys[currentSession.currentIndex];
-  const pressed = buildKeybindString();
-  const isCorrect = checkKeyPress(key, pressed);
-  // In learn phase, just pressing anything = learning (generous)
-  handleGrade(isCorrect ? 'good' : 'again', false);
+  // If they pressed at least a key, count it as good
+  const hasPress = pressedKeys.length > 0;
+  handleGrade(hasPress ? 'good' : 'again', false);
 });
 
 // Scaffold phase: "Reveal" button

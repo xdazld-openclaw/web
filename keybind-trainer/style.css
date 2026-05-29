@@ -492,6 +492,24 @@ header {
   letter-spacing: 1px;
 }
 
+/* Learn phase: shows what you're pressing next to the answer */
+.press-learn-feedback {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-left: 16px;
+  padding: 4px 10px;
+  background: rgba(154, 158, 167, 0.1);
+  border: 1px dashed var(--text-muted);
+  border-radius: var(--radius-sm);
+}
+
+.press-learn-feedback:not(:empty)::before {
+  content: '→ ';
+  color: var(--accent-primary);
+}
+
 /* Scaffold reveal hint */
 .press-reveal-hint {
   font-family: 'JetBrains Mono', monospace;

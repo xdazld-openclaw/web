@@ -63,13 +63,14 @@
         <div id="press-zone" style="display:none;">
           <!-- Learn phase: answer shown upfront -->
           <div id="press-learn" style="display:none;">
-            <div class="press-instructions">Press this keybind to learn it</div>
+            <div class="press-instructions">Press this keybind on your keyboard</div>
             <div class="press-display press-answer-shown">
-              <span class="keys-pressed press-keybind-answer" id="press-learn-answer"></span>
+              <span class="press-keybind-answer" id="press-learn-answer"></span>
+              <span class="press-learn-feedback" id="press-learn-feedback"></span>
             </div>
             <div class="press-buttons">
-              <button class="btn btn-secondary" id="press-skip">Skip →</button>
-              <button class="btn btn-success" id="press-done">✅ Pressed It</button>
+              <button class="btn btn-secondary" id="press-skip">Skip</button>
+              <button class="btn btn-success" id="press-done">✅ I Pressed It</button>
             </div>
           </div>
           <!-- Scaffold phase: hidden, tap to reveal -->
