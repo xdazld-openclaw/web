@@ -12,7 +12,13 @@ let sessionXP = 0;
 const SETTINGS_KEY = 'keybind_settings';
 let settings = {
   hideNumpad: false,
+  hideKDE: false,
 };
+
+// Detect platform
+const isLinux = /Linux/i.test(navigator.userAgent || navigator.platform);
+const isKDE = isLinux && /KDE|Plasma/i.test(navigator.userAgent || '');
+const showKDEToggle = isLinux; // Show on any Linux, KDE conflicts affect Plasma users
 
 function loadSettings() {
   try {
@@ -29,6 +35,10 @@ function getActiveKeys() {
   let keys = KEYBINDS;
   // Always skip browser-uninterceptable shortcuts (Ctrl+W/T/N, etc.)
   keys = keys.filter(k => !k.conflicts);
+  // Skip KDE Plasma conflicts if enabled
+  if (settings.hideKDE) {
+    keys = keys.filter(k => !k.kde);
+  }
   if (!settings.hideNumpad) return keys;
   return keys.filter(k => !k.keybind.toLowerCase().includes('numpad'));
 }
@@ -385,18 +395,36 @@ function resetPractice() {
   // Settings toggle
   const settingsContainer = document.getElementById('practice-settings');
   if (settingsContainer) {
-    settingsContainer.innerHTML = `
+    let html = `
       <label class="setting-toggle">
         <input type="checkbox" id="hide-numpad-toggle" ${settings.hideNumpad ? 'checked' : ''}>
         <span class="toggle-switch"></span>
         <span class="toggle-label">Hide numpad shortcuts</span>
       </label>
     `;
+    if (showKDEToggle) {
+      html += `
+      <label class="setting-toggle">
+        <input type="checkbox" id="hide-kde-toggle" ${settings.hideKDE ? 'checked' : ''}>
+        <span class="toggle-switch"></span>
+        <span class="toggle-label">Hide KDE Plasma conflicts</span>
+      </label>
+    `;
+    }
+    settingsContainer.innerHTML = html;
     document.getElementById('hide-numpad-toggle').addEventListener('change', (e) => {
       settings.hideNumpad = e.target.checked;
       saveSettings();
       resetPractice();
     });
+    const kdeToggle = document.getElementById('hide-kde-toggle');
+    if (kdeToggle) {
+      kdeToggle.addEventListener('change', (e) => {
+        settings.hideKDE = e.target.checked;
+        saveSettings();
+        resetPractice();
+      });
+    }
   }
 }
 

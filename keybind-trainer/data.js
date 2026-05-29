@@ -15,7 +15,7 @@ const KEYBINDS = [
   { id: "next_prev_tab_2", category: "Master Your IDE", action: "previous editor tab", keybind: "Alt+Left" },
   { id: "go_to_editor", category: "Master Your IDE", action: "Go to editor (from tool window)", keybind: "Esc" },
   { id: "close_tab_window_1", category: "Master Your IDE", action: "Close active tab", keybind: "Ctrl+Shift+F4" },
-  { id: "close_tab_window_2", category: "Master Your IDE", action: "window", keybind: "Ctrl+F4" },
+  { id: "close_tab_window_2", category: "Master Your IDE", action: "window", keybind: "Ctrl+F4", kde: true },
 
   // FIND EVERYTHING
   { id: "search_everywhere", category: "Find Everything", action: "Search everywhere", keybind: "Double Shift" },
@@ -25,7 +25,7 @@ const KEYBINDS = [
   { id: "find_replace_path_2", category: "Find Everything", action: "Replace in path", keybind: "Ctrl+Shift+R" },
   { id: "next_prev_occurrence_1", category: "Find Everything", action: "Next", keybind: "F3" },
   { id: "next_prev_occurrence_2", category: "Find Everything", action: "previous occurrence", keybind: "Shift+F3" },
-  { id: "find_word_caret", category: "Find Everything", action: "Find word at caret", keybind: "Ctrl+F3" },
+  { id: "find_word_caret", category: "Find Everything", action: "Find word at caret", keybind: "Ctrl+F3", kde: true },
   { id: "go_class_file_1", category: "Find Everything", action: "Go to class", keybind: "Ctrl+N", conflicts: true },
   { id: "go_class_file_2", category: "Find Everything", action: "file", keybind: "Ctrl+Shift+N", conflicts: true },
   { id: "go_file_member", category: "Find Everything", action: "Go to file member", keybind: "Ctrl+F12" },
@@ -54,7 +54,7 @@ const KEYBINDS = [
   { id: "introduce_var_param_2", category: "Refactor and Clean Up", action: "parameter", keybind: "Ctrl+Alt+P" },
   { id: "introduce_field_const_1", category: "Refactor and Clean Up", action: "Introduce field", keybind: "Ctrl+Alt+F" },
   { id: "introduce_field_const_2", category: "Refactor and Clean Up", action: "constant", keybind: "Ctrl+Alt+C" },
-  { id: "reformat_code", category: "Refactor and Clean Up", action: "Reformat code", keybind: "Ctrl+Alt+L" },
+  { id: "reformat_code", category: "Refactor and Clean Up", action: "Reformat code", keybind: "Ctrl+Alt+L", kde: true },
 
   // CREATE AND EDIT
   { id: "intention_actions", category: "Create and Edit", action: "Show intention actions", keybind: "Alt+Enter" },
@@ -70,7 +70,7 @@ const KEYBINDS = [
   { id: "generate_code", category: "Create and Edit", action: "Generate code", keybind: "Alt+Insert" },
   { id: "override_implement_1", category: "Create and Edit", action: "Override", keybind: "Ctrl+O" },
   { id: "override_implement_2", category: "Create and Edit", action: "implement members", keybind: "Ctrl+I" },
-  { id: "surround_with", category: "Create and Edit", action: "Surround with…", keybind: "Ctrl+Alt+T" },
+  { id: "surround_with", category: "Create and Edit", action: "Surround with…", keybind: "Ctrl+Alt+T", kde: true },
   { id: "line_comment", category: "Create and Edit", action: "Comment with line comment", keybind: "Ctrl+/" },
   { id: "extend_shrink_1", category: "Create and Edit", action: "Extend", keybind: "Ctrl+W", conflicts: true },
   { id: "extend_shrink_2", category: "Create and Edit", action: "shrink selection", keybind: "Ctrl+Shift+W" },
@@ -106,7 +106,7 @@ const KEYBINDS = [
   { id: "next_prev_change_2", category: "Version Control", action: "previous change", keybind: "Ctrl+Alt+Shift+Up" },
 
   // ANALYZE AND EXPLORE
-  { id: "show_error", category: "Analyze and Explore", action: "Show error description", keybind: "Ctrl+F1" },
+  { id: "show_error", category: "Analyze and Explore", action: "Show error description", keybind: "Ctrl+F1", kde: true },
   { id: "next_prev_error_1", category: "Analyze and Explore", action: "Next", keybind: "F2" },
   { id: "next_prev_error_2", category: "Analyze and Explore", action: "previous highlighted error", keybind: "Shift+F2" },
   { id: "run_inspection", category: "Analyze and Explore", action: "Run inspection by name…", keybind: "Ctrl+Alt+Shift+I" },
@@ -114,7 +114,7 @@ const KEYBINDS = [
   { id: "type_call_hierarchy_2", category: "Analyze and Explore", action: "call hierarchy", keybind: "Ctrl+Alt+H" },
 
   // NAVIGATE IN CONTEXT
-  { id: "select_in", category: "Navigate In Context", action: "Select in…", keybind: "Alt+F1" },
+  { id: "select_in", category: "Navigate In Context", action: "Select in…", keybind: "Alt+F1", kde: true },
   { id: "recent_viewed_locations_1", category: "Navigate In Context", action: "Recently viewed", keybind: "Ctrl+E" },
   { id: "recent_viewed_locations_2", category: "Navigate In Context", action: "recent locations", keybind: "Ctrl+Shift+E" },
   { id: "last_edit_location", category: "Navigate In Context", action: "Last edit location", keybind: "Ctrl+Shift+Backspace" },
@@ -145,7 +145,7 @@ const KEYBINDS = [
   { id: "run_to_cursor_2", category: "Build, Run, and Debug", action: "Force run to cursor", keybind: "Ctrl+Alt+F9" },
   { id: "show_execution", category: "Build, Run, and Debug", action: "Show execution point", keybind: "Alt+F10" },
   { id: "evaluate_expression", category: "Build, Run, and Debug", action: "Evaluate expression…", keybind: "Alt+F8" },
-  { id: "stop", category: "Build, Run, and Debug", action: "Stop", keybind: "Ctrl+F2" },
+  { id: "stop", category: "Build, Run, and Debug", action: "Stop", keybind: "Ctrl+F2", kde: true },
   { id: "stop_background", category: "Build, Run, and Debug", action: "Stop background processes…", keybind: "Ctrl+Shift+F2" },
   { id: "resume_program", category: "Build, Run, and Debug", action: "Resume program", keybind: "F9" },
   { id: "toggle_breakpoint", category: "Build, Run, and Debug", action: "Toggle line breakpoint", keybind: "Ctrl+F8" },
