@@ -73,7 +73,7 @@ const KEYBINDS = [
   { id: "surround_with", category: "Create and Edit", action: "Surround with…", keybind: "Ctrl+Alt+T", kde: true },
   { id: "line_comment", category: "Create and Edit", action: "Comment with line comment", keybind: "Ctrl+/" },
   { id: "extend_shrink_1", category: "Create and Edit", action: "Extend", keybind: "Ctrl+W", conflicts: true },
-  { id: "extend_shrink_2", category: "Create and Edit", action: "shrink selection", keybind: "Ctrl+Shift+W" },
+  { id: "extend_shrink_2", category: "Create and Edit", action: "shrink selection", keybind: "Ctrl+Shift+W", conflicts: true },
   { id: "optimize_imports", category: "Create and Edit", action: "Optimize imports", keybind: "Ctrl+Alt+O" },
   { id: "auto_indent", category: "Create and Edit", action: "Auto-indent lines", keybind: "Ctrl+Alt+I" },
   { id: "cut_copy_paste_1", category: "Create and Edit", action: "Cut", keybind: "Ctrl+X" },
