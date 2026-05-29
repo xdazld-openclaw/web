@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PyCharm Keybind Trainer</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <!-- Header -->
+  <header>
+    <div class="logo">⌨️ <span>PyCharm Keybind Trainer</span></div>
+    <div class="stats-bar">
+      <div class="stat" title="Experience Points">✨ <span id="xp-display">0</span> XP</div>
+      <div class="stat" title="Current Level">🏆 Level <span id="level-display">1</span></div>
+      <div class="stat" title="Streak">🔥 <span id="streak-display">0</span></div>
+      <div class="stat" title="Keys Learned">📚 <span id="learned-display">0</span>/<span id="total-display">0</span></div>
+    </div>
+    <div class="progress-container">
+      <div class="progress-bar"><div class="progress-fill" id="xp-progress"></div></div>
+      <span class="progress-label" id="xp-progress-label">0 / 100 XP to next level</span>
+    </div>
+  </header>
+
+  <!-- Navigation -->
+  <nav class="main-nav">
+    <button class="nav-btn active" data-view="dashboard">📊 Dashboard</button>
+    <button class="nav-btn" data-view="practice">🎮 Practice</button>
+    <button class="nav-btn" data-view="review">🔄 Spaced Review</button>
+    <button class="nav-btn" data-view="stats">📈 Stats</button>
+    <button class="nav-btn" data-view="reference">📖 Reference</button>
+  </nav>
+
+  <!-- Shared Session UI (used by both Practice and Spaced Review) -->
+  <div id="shared-session" style="display:none;">
+    <div class="session-header">
+      <span class="session-info">Card <span id="current-card-num">1</span> / <span id="total-cards">0</span></span>
+      <span class="session-info">Score: <span id="session-correct">0</span> / <span id="session-total">0</span></span>
+      <span class="session-info">Streak: <span id="session-streak">0</span> 🔥</span>
+      <button class="btn btn-small btn-danger" onclick="endSession()">✕ End Session</button>
+    </div>
+    <div class="progress-bar session-progress"><div class="progress-fill" id="session-progress"></div></div>
+    
+    <div class="flashcard-area">
+      <div class="flashcard" id="flashcard">
+        <div class="flashcard-front" id="flashcard-front">
+          <div class="card-category" id="card-category"></div>
+          <div class="card-question" id="card-question"></div>
+          <div class="card-hint" id="card-hint"></div>
+        </div>
+      </div>
+
+      <div class="answer-area" id="answer-area">
+        <!-- Type mode: input field -->
+        <div id="type-input" style="display:none;">
+          <input type="text" id="type-answer" placeholder="Type the keybind (e.g., Ctrl+Shift+A)" autocomplete="off">
+          <button class="btn btn-primary" id="submit-answer">Submit</button>
+        </div>
+        <!-- Flashcard mode: reveal + self-grade -->
+        <div id="flashcard-answer" style="display:none;">
+          <button class="btn btn-primary reveal-btn" id="reveal-answer">Show Answer</button>
+          <div class="answer-reveal" id="answer-reveal" style="display:none;">
+            <div class="correct-answer" id="correct-answer"></div>
+            <div class="grade-buttons">
+              <button class="btn btn-danger grade-btn" data-grade="again">😵 Again</button>
+              <button class="btn btn-warning grade-btn" data-grade="hard">🤔 Hard</button>
+              <button class="btn btn-success grade-btn" data-grade="good">😊 Good</button>
+              <button class="btn btn-info grade-btn" data-grade="easy">😎 Easy</button>
+            </div>
+          </div>
+        </div>
+        <!-- Reverse mode: input for action name -->
+        <div id="reverse-input" style="display:none;">
+          <input type="text" id="reverse-answer" placeholder="What action does this do?" autocomplete="off">
+          <button class="btn btn-primary" id="submit-reverse">Submit</button>
+          <div class="reverse-reveal" id="reverse-reveal" style="display:none;">
+            <div class="correct-action" id="correct-action"></div>
+            <div class="grade-buttons">
+              <button class="btn btn-danger grade-btn" data-grade="again">😵 Again</button>
+              <button class="btn btn-warning grade-btn" data-grade="hard">🤔 Hard</button>
+              <button class="btn btn-success grade-btn" data-grade="good">😊 Good</button>
+              <button class="btn btn-info grade-btn" data-grade="easy">😎 Easy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shared Session End -->
+  <div id="shared-session-end" style="display:none;">
+    <div class="session-end">
+      <h2>🎉 Session Complete!</h2>
+      <div class="results-grid">
+        <div class="result-card"><div class="result-value" id="end-accuracy">0%</div><div class="result-label">Accuracy</div></div>
+        <div class="result-card"><div class="result-value" id="end-xp">0</div><div class="result-label">XP Earned</div></div>
+        <div class="result-card"><div class="result-value" id="end-streak">0</div><div class="result-label">Best Streak</div></div>
+        <div class="result-card"><div class="result-value" id="end-learned">0</div><div class="result-label">Keys Mastered</div></div>
+      </div>
+      <div id="end-achievements"></div>
+      <button class="btn btn-primary" id="end-practice-more">Practice More</button>
+      <button class="btn btn-secondary" id="end-back-dashboard">Back to Dashboard</button>
+    </div>
+  </div>
+
+  <!-- Views -->
+  <main>
+    <!-- Dashboard View -->
+    <div id="view-dashboard" class="view active">
+      <div class="dashboard-grid">
+        <div class="card welcome-card">
+          <h2>👋 Welcome Back!</h2>
+          <div id="dashboard-greeting"></div>
+          <div id="daily-summary"></div>
+        </div>
+        <div class="card">
+          <h3>📊 Today's Progress</h3>
+          <div class="stat-row"><span>Session Time:</span><span id="today-time">0m</span></div>
+          <div class="stat-row"><span>Cards Reviewed:</span><span id="today-cards">0</span></div>
+          <div class="stat-row"><span>Correct Rate:</span><span id="today-accuracy">—</span></div>
+          <div class="stat-row"><span>XP Earned:</span><span id="today-xp">0</span></div>
+        </div>
+        <div class="card">
+          <h3>🎯 Quick Start</h3>
+          <button class="btn btn-primary" onclick="startPractice('all')">🎮 Practice All</button>
+          <button class="btn btn-secondary" onclick="startSpacedReview()">🔄 Spaced Review</button>
+          <button class="btn btn-secondary" onclick="startPractice('due')">⚡ Practice Due Keys</button>
+        </div>
+        <div class="card">
+          <h3>📈 Mastery Distribution</h3>
+          <div id="mastery-chart"></div>
+        </div>
+        <div class="card">
+          <h3>🏅 Recent Achievements</h3>
+          <div id="achievements-list"></div>
+        </div>
+        <div class="card">
+          <h3>🔥 Weakest Keys</h3>
+          <div id="weakest-keys"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Practice View -->
+    <div id="view-practice" class="view">
+      <div class="practice-setup" id="practice-setup">
+        <h2>🎮 Practice Mode</h2>
+        <div class="setup-grid">
+          <div class="card">
+            <h3>Choose Category</h3>
+            <div id="category-buttons" class="button-grid"></div>
+          </div>
+          <div class="card">
+            <h3>Practice Style</h3>
+            <div class="style-options">
+              <button class="btn btn-primary style-btn" data-style="flashcard">🃏 Flashcard — See action, recall keybind</button>
+              <button class="btn btn-secondary style-btn" data-style="reverse">🔄 Reverse — See keybind, name the action</button>
+              <button class="btn btn-secondary style-btn" data-style="type">⌨️ Type It — Type the exact keybind</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Spaced Review View -->
+    <div id="view-review" class="view">
+      <div id="review-setup">
+        <h2>🔄 Spaced Review</h2>
+        <p>Review keys you've learned before — SM-2 algorithm decides what to show next.</p>
+        <div class="review-info">
+          <div class="card">
+            <h3>Today's Due</h3>
+            <div class="stat-row"><span>Keys to review:</span><span id="due-count">0</span></div>
+            <div class="stat-row"><span>Keys due soon:</span><span id="due-soon-count">0</span></div>
+          </div>
+        </div>
+        <button class="btn btn-primary" id="start-review-btn" onclick="startSpacedReview()">Start Review Session</button>
+      </div>
+    </div>
+
+    <!-- Stats View -->
+    <div id="view-stats" class="view">
+      <h2>📈 Statistics</h2>
+      <div class="stats-grid">
+        <div class="card">
+          <h3>Overall</h3>
+          <div class="stat-row"><span>Total XP:</span><span id="stat-total-xp">0</span></div>
+          <div class="stat-row"><span>Current Level:</span><span id="stat-level">1</span></div>
+          <div class="stat-row"><span>Best Streak:</span><span id="stat-best-streak">0</span></div>
+          <div class="stat-row"><span>Total Sessions:</span><span id="stat-sessions">0</span></div>
+          <div class="stat-row"><span>Total Reviews:</span><span id="stat-reviews">0</span></div>
+          <div class="stat-row"><span>Overall Accuracy:</span><span id="stat-accuracy">0%</span></div>
+          <div class="stat-row"><span>Current Streak:</span><span id="stat-streak">0 days</span></div>
+        </div>
+        <div class="card">
+          <h3>By Category</h3>
+          <div id="category-stats"></div>
+        </div>
+        <div class="card full-width">
+          <h3>7-Day Activity</h3>
+          <div id="weekly-chart"></div>
+        </div>
+        <div class="card full-width">
+          <h3>🏅 Achievements</h3>
+          <div id="all-achievements" class="achievements-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reference View -->
+    <div id="view-reference" class="view">
+      <h2>📖 Keybind Reference</h2>
+      <div class="search-bar">
+        <input type="text" id="ref-search" placeholder="Search keybinds...">
+      </div>
+      <div id="reference-list"></div>
+    </div>
+  </main>
+</div>
+
+<script src="data.js"></script>
+<script src="spaced.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
