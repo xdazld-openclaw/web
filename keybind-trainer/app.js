@@ -102,6 +102,7 @@ function normalizeKey(e) {
     'PageUp': 'PageUp', 'PageDown': 'PageDown', 'Insert': 'Insert',
     '`': '`', '~': '`',
     // Browser-mapped keys
+    'Backquote': '`',
     'WakeUp': 'F1', 'AudioVolumeMute': 'MediaVolumeMute',
     'AudioVolumeDown': 'MediaVolumeDown', 'AudioVolumeUp': 'MediaVolumeUp',
     'MediaPlayPause': 'MediaPlayPause', 'MediaTrackNext': 'MediaNext',
