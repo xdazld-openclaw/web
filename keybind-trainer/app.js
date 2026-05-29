@@ -27,6 +27,8 @@ function saveSettings() {
 
 function getActiveKeys() {
   let keys = KEYBINDS;
+  // Always skip browser-uninterceptable shortcuts (Ctrl+W/T/N, etc.)
+  keys = keys.filter(k => !k.conflicts);
   if (!settings.hideNumpad) return keys;
   return keys.filter(k => !k.keybind.toLowerCase().includes('numpad'));
 }

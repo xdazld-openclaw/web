@@ -26,8 +26,8 @@ const KEYBINDS = [
   { id: "next_prev_occurrence_1", category: "Find Everything", action: "Next", keybind: "F3" },
   { id: "next_prev_occurrence_2", category: "Find Everything", action: "previous occurrence", keybind: "Shift+F3" },
   { id: "find_word_caret", category: "Find Everything", action: "Find word at caret", keybind: "Ctrl+F3" },
-  { id: "go_class_file_1", category: "Find Everything", action: "Go to class", keybind: "Ctrl+N" },
-  { id: "go_class_file_2", category: "Find Everything", action: "file", keybind: "Ctrl+Shift+N" },
+  { id: "go_class_file_1", category: "Find Everything", action: "Go to class", keybind: "Ctrl+N", conflicts: true },
+  { id: "go_class_file_2", category: "Find Everything", action: "file", keybind: "Ctrl+Shift+N", conflicts: true },
   { id: "go_file_member", category: "Find Everything", action: "Go to file member", keybind: "Ctrl+F12" },
   { id: "go_symbol", category: "Find Everything", action: "Go to symbol", keybind: "Ctrl+Alt+Shift+N" },
 
@@ -72,7 +72,7 @@ const KEYBINDS = [
   { id: "override_implement_2", category: "Create and Edit", action: "implement members", keybind: "Ctrl+I" },
   { id: "surround_with", category: "Create and Edit", action: "Surround with…", keybind: "Ctrl+Alt+T" },
   { id: "line_comment", category: "Create and Edit", action: "Comment with line comment", keybind: "Ctrl+/" },
-  { id: "extend_shrink_1", category: "Create and Edit", action: "Extend", keybind: "Ctrl+W" },
+  { id: "extend_shrink_1", category: "Create and Edit", action: "Extend", keybind: "Ctrl+W", conflicts: true },
   { id: "extend_shrink_2", category: "Create and Edit", action: "shrink selection", keybind: "Ctrl+Shift+W" },
   { id: "optimize_imports", category: "Create and Edit", action: "Optimize imports", keybind: "Ctrl+Alt+O" },
   { id: "auto_indent", category: "Create and Edit", action: "Auto-indent lines", keybind: "Ctrl+Alt+I" },
@@ -98,7 +98,7 @@ const KEYBINDS = [
   // VERSION CONTROL
   { id: "vcs_popup", category: "Version Control", action: "VCS operations popup…", keybind: "Alt+`" },
   { id: "commit", category: "Version Control", action: "Commit", keybind: "Ctrl+K" },
-  { id: "update_project", category: "Version Control", action: "Update project", keybind: "Ctrl+T" },
+  { id: "update_project", category: "Version Control", action: "Update project", keybind: "Ctrl+T", conflicts: true },
   { id: "recent_changes", category: "Version Control", action: "Recent changes", keybind: "Alt+Shift+C" },
   { id: "revert", category: "Version Control", action: "Revert", keybind: "Ctrl+Alt+Z" },
   { id: "push", category: "Version Control", action: "Push…", keybind: "Ctrl+Shift+K" },
