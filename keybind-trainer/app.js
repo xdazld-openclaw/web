@@ -26,8 +26,11 @@ function saveSettings() {
 }
 
 function getActiveKeys() {
-  if (!settings.hideNumpad) return KEYBINDS;
-  return KEYBINDS.filter(k => !k.keybind.toLowerCase().includes('numpad'));
+  let keys = KEYBINDS;
+  // Always skip browser-conflicting shortcuts (Edge/Chrome intercept these)
+  keys = keys.filter(k => !k.conflicts);
+  if (!settings.hideNumpad) return keys;
+  return keys.filter(k => !k.keybind.toLowerCase().includes('numpad'));
 }
 
 loadSettings();
