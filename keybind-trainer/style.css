@@ -1,46 +1,51 @@
-/* PyCharm Keybind Trainer — Darcula Theme
-   Colors sourced from official JetBrains Darcula palette */
+/* PyCharm Keybind Trainer — JetBrains Islands Theme (2025.3+)
+   Colors sourced from official JetBrains Islands Dark palette */
 
 :root {
-  /* Core Darcula backgrounds */
-  --bg-primary: #2B2B2B;       /* Editor / main background */
-  --bg-secondary: #27292A;     /* Sidebar / inactive areas */
-  --bg-card: #3C3F41;          /* Panels / menus */
-  --bg-card-hover: #4E5254;    /* Active tab */
-  --bg-input: #45494A;         /* Input fields */
-  --bg-selection: #0D293E;     /* List selection */
+  /* Islands Dark backgrounds */
+  --bg-primary: #181a1d;       /* Editor / main */
+  --bg-secondary: #161619;     /* Sidebar / tool windows */
+  --bg-card: #21242a;          /* Panels / widgets */
+  --bg-card-hover: #25262a;    /* Selection / hover */
+  --bg-input: #181a1d;         /* Input fields */
+  --bg-section: #1e1f22;       /* Section headers */
+  --bg-selection: #25262a90;   /* List active selection */
 
-  /* Text */
-  --text-primary: #BBBBBB;     /* Main text */
-  --text-secondary: #A7A7A7;   /* Secondary text / sidebar */
-  --text-muted: #808080;       /* Comments / ignored */
-  --text-bright: #D3D3D3;      /* Active panel title */
+  /* Text — Islands is lighter and warmer than Darcula */
+  --text-primary: #d4d5d9;     /* Main text */
+  --text-secondary: #bcbec4;   /* Icons / secondary */
+  --text-muted: #9a9ea7;       /* Description text */
+  --text-faint: #8a8e97;       /* Inactive text */
 
   /* Borders */
-  --border: #505050;           /* Panel / group borders */
-  --border-light: #464646;     /* Subtle borders */
-  --border-input: #646464;     /* Input / dropdown borders */
+  --border: #2b2d30;           /* Primary borders */
+  --border-light: #3c3f41;     /* Subtle borders / checkbox */
+  --border-input: #3c3f41;
 
-  /* Darcula accent colors */
-  --accent-primary: #4A7A88;   /* Panel title active / link blue */
-  --accent-secondary: #6897BB; /* Git modified blue */
-  --accent-success: #629755;   /* Git added green */
-  --accent-warning: #D1675A;   /* Git untracked / error red-orange */
-  --accent-danger: #D1675A;    /* Error / delete */
-  --accent-info: #4095AC;      /* Active tab border blue */
+  /* Islands accent colors */
+  --accent-primary: #548af7;   /* Link / focus blue */
+  --accent-secondary: #7cacf8; /* Active link blue */
+  --accent-button: #3d6dbf;    /* Button blue */
+  --accent-button-hover: #4d7dcf;
+  --accent-success: #73b00a;   /* Git added green */
+  --accent-warning: #e8a33e;   /* Warning yellow */
+  --accent-danger: #f75464;    /* Error / delete red */
+  --accent-info: #548af7;      /* Info blue (same as primary) */
 
-  /* Gradients matching Darcula feel */
-  --gradient-primary: linear-gradient(135deg, #4A7A88, #6897BB);
-  --gradient-success: linear-gradient(135deg, #629755, #7CB342);
-  --shadow: 0 4px 20px rgba(0,0,0,0.4);
-  --radius: 6px;               /* Darcula uses tighter corners */
-  --radius-sm: 4px;
+  /* Gradients matching Islands feel */
+  --gradient-primary: linear-gradient(135deg, #3d6dbf, #548af7);
+  --gradient-success: linear-gradient(135deg, #73b00a, #8bc34a);
+
+  /* Islands uses much rounder corners */
+  --radius: 10px;
+  --radius-sm: 6px;
+  --radius-lg: 14px;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  font-family: 'JetBrains Mono', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: var(--bg-primary);
   color: var(--text-primary);
   min-height: 100vh;
@@ -49,41 +54,40 @@ body {
 
 #app { max-width: 1200px; margin: 0 auto; padding: 20px; }
 
-/* Header */
+/* Header — Islands card style */
 header {
-  background: var(--bg-secondary);
+  background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 16px 20px;
-  margin-bottom: 12px;
+  border-radius: var(--radius-lg);
+  padding: 18px 22px;
+  margin-bottom: 14px;
 }
 
 .logo {
   font-size: 1.3rem;
   font-weight: 600;
-  margin-bottom: 10px;
-  color: var(--text-bright);
-  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 12px;
+  color: var(--text-primary);
 }
 
-.logo span { color: var(--accent-secondary); }
+.logo span { color: var(--accent-primary); }
 
-.stats-bar { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+.stats-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
 
 .stat {
-  background: var(--bg-card);
+  background: var(--bg-secondary);
   border: 1px solid var(--border);
-  padding: 6px 14px;
   border-radius: var(--radius-sm);
-  font-size: 0.85rem;
-  color: var(--text-primary);
+  padding: 5px 12px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
 }
 
 .progress-container { margin-top: 6px; }
 
 .progress-bar {
-  background: var(--bg-input);
-  border: 1px solid var(--border-light);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   height: 6px;
   overflow: hidden;
@@ -103,23 +107,19 @@ header {
   display: block;
 }
 
-/* Navigation — Darcula tab style */
+/* Navigation — Islands style (clean, flat, pill-like) */
 .main-nav {
   display: flex;
-  gap: 2px;
+  gap: 4px;
   margin-bottom: 16px;
   flex-wrap: wrap;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 4px;
 }
 
 .nav-btn {
   background: transparent;
   border: none;
-  color: var(--text-secondary);
-  padding: 8px 16px;
+  color: var(--text-muted);
+  padding: 8px 14px;
   border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 0.85rem;
@@ -127,12 +127,14 @@ header {
   transition: all 0.15s ease;
 }
 
-.nav-btn:hover { background: var(--bg-card); color: var(--text-primary); }
+.nav-btn:hover {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
 
 .nav-btn.active {
-  background: var(--bg-card-hover);
-  color: var(--text-bright);
-  border-bottom: 2px solid var(--accent-info);
+  background: var(--accent-button);
+  color: #ffffff;
 }
 
 /* Views */
@@ -144,7 +146,7 @@ header {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Cards — Darcula panel style */
+/* Cards — Islands panel style */
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -154,9 +156,9 @@ header {
 }
 
 .card h3 {
-  font-size: 1rem;
+  font-size: 0.95rem;
   margin-bottom: 12px;
-  color: var(--text-bright);
+  color: var(--text-primary);
   font-weight: 600;
 }
 
@@ -175,17 +177,17 @@ header {
   display: flex;
   justify-content: space-between;
   padding: 6px 0;
-  border-bottom: 1px solid var(--border-light);
-  font-size: 0.85rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.8rem;
 }
 
 .stat-row:last-child { border-bottom: none; }
-.stat-row span:last-child { color: var(--accent-secondary); font-weight: 600; }
+.stat-row span:last-child { color: var(--accent-primary); font-weight: 600; }
 
-/* Buttons — Darcula style */
+/* Buttons — Islands style (rounded, flat, blue primary) */
 .btn {
-  padding: 8px 18px;
-  border: 1px solid var(--border);
+  padding: 8px 16px;
+  border: none;
   border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 0.85rem;
@@ -194,25 +196,29 @@ header {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: var(--bg-input);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+.btn:hover {
+  background: var(--bg-card-hover);
   color: var(--text-primary);
 }
 
-.btn:hover { background: var(--bg-card-hover); }
-
 .btn-primary {
-  background: var(--accent-primary);
-  border-color: var(--accent-primary);
-  color: #fff;
+  background: var(--accent-button);
+  border-color: var(--accent-button);
+  color: #ffffff;
 }
 
-.btn-primary:hover { opacity: 0.9; }
+.btn-primary:hover { background: var(--accent-button-hover); }
 
 .btn-success { background: var(--accent-success); border-color: var(--accent-success); color: #fff; }
-.btn-warning { background: var(--accent-warning); border-color: var(--accent-warning); color: #fff; }
+.btn-warning { background: var(--accent-warning); border-color: var(--accent-warning); color: #181a1d; }
 .btn-danger { background: var(--accent-danger); border-color: var(--accent-danger); color: #fff; }
-.btn-info { background: var(--accent-info); border-color: var(--accent-info); color: #fff; }
-.btn-small { padding: 5px 10px; font-size: 0.8rem; }
+.btn-info { background: var(--accent-primary); border-color: var(--accent-primary); color: #fff; }
+.btn-small { padding: 5px 10px; font-size: 0.75rem; }
 .btn-large { padding: 14px 28px; font-size: 1rem; }
 
 /* Mastery Chart */
@@ -220,18 +226,18 @@ header {
 
 .mastery-bar-row {
   display: grid;
-  grid-template-columns: 85px 1fr 28px;
+  grid-template-columns: 80px 1fr 28px;
   align-items: center;
   gap: 10px;
   font-size: 0.8rem;
 }
 
-.mastery-label { color: var(--text-secondary); }
+.mastery-label { color: var(--text-muted); }
 
 .mastery-bar-track {
-  background: var(--bg-input);
+  background: var(--bg-secondary);
   border-radius: var(--radius-sm);
-  height: 10px;
+  height: 8px;
   overflow: hidden;
 }
 
@@ -241,7 +247,7 @@ header {
 /* Achievements */
 .achievement-badge {
   background: var(--bg-secondary);
-  border: 1px solid var(--border-light);
+  border: 1px solid var(--border);
   padding: 8px 12px;
   border-radius: var(--radius-sm);
   margin-bottom: 6px;
@@ -257,7 +263,7 @@ header {
   gap: 10px;
   align-items: center;
   padding: 6px 0;
-  border-bottom: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border);
   font-size: 0.8rem;
 }
 
@@ -266,18 +272,18 @@ header {
 .weak-key-key {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.75rem;
-  background: var(--bg-primary);
-  border: 1px solid var(--border-light);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
   padding: 2px 8px;
   border-radius: var(--radius-sm);
-  color: var(--accent-secondary);
+  color: var(--accent-primary);
 }
 
 .weak-key-accuracy { color: var(--accent-danger); font-weight: 600; }
 
 /* Onboarding */
 .onboarding-card { text-align: center; max-width: 600px; margin: 40px auto; }
-.onboarding-steps { display: flex; flex-direction: column; gap: 16px; margin: 20px 0; text-align: left; }
+.onboarding-steps { display: flex; flex-direction: column; gap: 14px; margin: 20px 0; text-align: left; }
 
 .onboarding-step {
   display: flex;
@@ -289,18 +295,17 @@ header {
   border-radius: var(--radius);
 }
 
-.step-icon { font-size: 1.6rem; flex-shrink: 0; }
+.step-icon { font-size: 1.5rem; flex-shrink: 0; }
 .step-text { font-size: 0.9rem; line-height: 1.5; }
 
 .step-text kbd {
   background: var(--bg-input);
-  border: 1px solid var(--border);
-  border-bottom-width: 2px;
-  border-radius: 3px;
-  padding: 1px 5px;
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  padding: 1px 6px;
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.8rem;
-  color: var(--accent-secondary);
+  color: var(--accent-primary);
 }
 
 /* Practice Setup */
@@ -318,9 +323,9 @@ header {
 
 .style-options { display: flex; flex-direction: column; gap: 8px; }
 .style-btn { justify-content: flex-start; text-align: left; padding: 12px 14px; }
-.style-btn.active { background: var(--accent-primary); border-color: var(--accent-primary); color: #fff; }
+.style-btn.active { background: var(--accent-button); border-color: var(--accent-button); color: #fff; }
 
-.setup-subtitle { color: var(--text-secondary); margin-bottom: 16px; font-size: 0.9rem; }
+.setup-subtitle { color: var(--text-muted); margin-bottom: 16px; font-size: 0.9rem; }
 
 /* Session Header */
 .session-header {
@@ -328,7 +333,7 @@ header {
   justify-content: space-between;
   align-items: center;
   padding: 10px 14px;
-  background: var(--bg-secondary);
+  background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   margin-bottom: 10px;
@@ -336,8 +341,8 @@ header {
   gap: 8px;
 }
 
-.session-info { font-size: 0.8rem; color: var(--text-secondary); }
-.session-info span { color: var(--accent-secondary); font-weight: 600; }
+.session-info { font-size: 0.8rem; color: var(--text-muted); }
+.session-info span { color: var(--accent-primary); font-weight: 600; }
 .session-progress { margin-bottom: 16px; height: 3px; }
 
 /* Flashcard */
@@ -361,30 +366,36 @@ header {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  box-shadow: var(--shadow);
 }
 
 .card-category {
   font-size: 0.75rem;
-  color: var(--accent-secondary);
+  color: var(--accent-primary);
   margin-bottom: 12px;
   text-transform: uppercase;
   letter-spacing: 1px;
   font-weight: 600;
 }
 
-.card-question { font-size: 1.4rem; font-weight: 600; margin-bottom: 12px; line-height: 1.4; color: var(--text-bright); }
+.card-question {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  line-height: 1.4;
+  color: var(--text-primary);
+}
+
 .card-hint { font-size: 0.85rem; color: var(--text-muted); }
 
 /* Answer Area */
 .answer-area { text-align: center; width: 100%; max-width: 500px; }
 
 /* Press It Zone */
-.press-instructions { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 12px; }
+.press-instructions { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 12px; }
 
 .press-display {
-  background: var(--bg-primary);
-  border: 2px solid var(--border);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 20px;
   margin-bottom: 14px;
@@ -398,7 +409,7 @@ header {
   font-family: 'JetBrains Mono', monospace;
   font-size: 1.6rem;
   font-weight: 700;
-  color: var(--accent-secondary);
+  color: var(--accent-primary);
   letter-spacing: 1px;
 }
 
@@ -409,8 +420,8 @@ header {
 }
 
 .press-browser-note {
-  background: rgba(209, 103, 90, 0.1);
-  border: 1px solid var(--accent-warning);
+  background: rgba(247, 84, 100, 0.1);
+  border: 1px solid var(--accent-danger);
   border-radius: var(--radius-sm);
   padding: 10px;
   margin-bottom: 10px;
@@ -425,12 +436,12 @@ header {
   font-size: 1.6rem;
   font-weight: 700;
   margin-bottom: 16px;
-  background: var(--bg-primary);
+  background: var(--bg-secondary);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 14px 20px;
   font-family: 'JetBrains Mono', monospace;
-  color: var(--accent-secondary);
+  color: var(--accent-primary);
 }
 
 .grade-buttons { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
@@ -458,7 +469,7 @@ header {
 .result-value {
   font-size: 1.8rem;
   font-weight: 700;
-  color: var(--accent-secondary);
+  color: var(--accent-primary);
   font-family: 'JetBrains Mono', monospace;
 }
 
@@ -481,10 +492,10 @@ header {
 .full-width { grid-column: 1 / -1; }
 
 .cat-stat { margin-bottom: 10px; }
-.cat-stat-header { font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; color: var(--text-primary); }
+.cat-stat-header { font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; }
 
 .cat-stat-bar {
-  background: var(--bg-input);
+  background: var(--bg-secondary);
   border-radius: var(--radius-sm);
   height: 6px;
   overflow: hidden;
@@ -512,7 +523,7 @@ header {
 }
 
 .weekly-bar { width: 14px; border-radius: 2px; min-height: 3px; }
-.xp-bar { background: var(--accent-info); }
+.xp-bar { background: var(--accent-primary); }
 .rev-bar { background: var(--accent-success); }
 .weekly-day { font-size: 0.65rem; color: var(--text-muted); margin-top: 4px; }
 .weekly-legend { display: flex; gap: 14px; justify-content: center; margin-top: 6px; font-size: 0.7rem; color: var(--text-muted); }
@@ -526,14 +537,14 @@ header {
 
 .achievement-card {
   background: var(--bg-secondary);
-  border: 1px solid var(--border-light);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 14px;
   text-align: center;
   transition: all 0.15s;
 }
 
-.achievement-card.unlocked { border-color: var(--accent-info); background: rgba(74, 122, 136, 0.15); }
+.achievement-card.unlocked { border-color: var(--accent-primary); background: rgba(84, 138, 247, 0.1); }
 .achievement-card.locked { opacity: 0.4; }
 .ach-icon { font-size: 1.3rem; margin-bottom: 6px; }
 .ach-name { font-size: 0.8rem; font-weight: 600; margin-bottom: 3px; }
@@ -553,14 +564,16 @@ header {
   font-family: 'JetBrains Mono', monospace;
 }
 
-.search-bar input:focus { outline: none; border-color: var(--accent-primary); }
+.search-bar input::placeholder { color: var(--text-faint); }
+.search-bar input:focus { outline: none; border-color: var(--accent-primary); box-shadow: 0 0 0 2px #548af730; }
 
 .ref-category {
   font-size: 1rem;
   padding: 12px 0 6px;
-  border-bottom: 2px solid var(--border);
+  border-bottom: 1px solid var(--border);
   margin-bottom: 6px;
-  color: var(--text-bright);
+  color: var(--text-primary);
+  font-weight: 600;
 }
 
 .ref-item {
@@ -569,18 +582,18 @@ header {
   gap: 12px;
   align-items: center;
   padding: 8px 0;
-  border-bottom: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border);
   font-size: 0.85rem;
 }
 
 .ref-keybind {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.8rem;
-  background: var(--bg-primary);
-  border: 1px solid var(--border-light);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
   padding: 3px 10px;
   border-radius: var(--radius-sm);
-  color: var(--accent-secondary);
+  color: var(--accent-primary);
   white-space: nowrap;
 }
 
@@ -588,8 +601,8 @@ header {
 
 /* Utility */
 .muted { color: var(--text-muted); font-style: italic; font-size: 0.85rem; }
-h2 { font-size: 1.2rem; margin-bottom: 12px; color: var(--text-bright); font-weight: 600; }
-h3 { font-size: 1rem; margin-bottom: 10px; color: var(--text-bright); }
-p { margin-bottom: 10px; line-height: 1.5; }
+h2 { font-size: 1.2rem; margin-bottom: 12px; color: var(--text-primary); font-weight: 600; }
+h3 { font-size: 0.95rem; margin-bottom: 10px; color: var(--text-primary); }
+p { margin-bottom: 10px; line-height: 1.5; color: var(--text-secondary); }
 
 .quick-btn { width: 100%; margin-bottom: 6px; justify-content: center; }
