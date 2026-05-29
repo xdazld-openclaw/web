@@ -26,19 +26,19 @@
   <!-- Navigation -->
   <nav class="main-nav">
     <button class="nav-btn active" data-view="dashboard">📊 Dashboard</button>
-    <button class="nav-btn" data-view="practice">🎮 Practice</button>
-    <button class="nav-btn" data-view="review">🔄 Spaced Review</button>
+    <button class="nav-btn" data-view="practice">🎯 Practice</button>
+    <button class="nav-btn" data-view="review">🔄 Review</button>
     <button class="nav-btn" data-view="stats">📈 Stats</button>
     <button class="nav-btn" data-view="reference">📖 Reference</button>
   </nav>
 
-  <!-- Shared Session UI (used by both Practice and Spaced Review) -->
+  <!-- Shared Session UI (used by both Practice and Review) -->
   <div id="shared-session" style="display:none;">
     <div class="session-header">
       <span class="session-info">Card <span id="current-card-num">1</span> / <span id="total-cards">0</span></span>
       <span class="session-info">Score: <span id="session-correct">0</span> / <span id="session-total">0</span></span>
       <span class="session-info">Streak: <span id="session-streak">0</span> 🔥</span>
-      <button class="btn btn-small btn-danger" onclick="endSession()">✕ End Session</button>
+      <button class="btn btn-small btn-danger" id="end-session-btn">✕ End</button>
     </div>
     <div class="progress-bar session-progress"><div class="progress-fill" id="session-progress"></div></div>
     
@@ -52,30 +52,27 @@
       </div>
 
       <div class="answer-area" id="answer-area">
-        <!-- Type mode: input field -->
-        <div id="type-input" style="display:none;">
-          <input type="text" id="type-answer" placeholder="Type the keybind (e.g., Ctrl+Shift+A)" autocomplete="off">
-          <button class="btn btn-primary" id="submit-answer">Submit</button>
+        <!-- PRESS mode: capture actual keypresses -->
+        <div id="press-zone" style="display:none;">
+          <div class="press-instructions">Press the keybind on your keyboard</div>
+          <div class="press-display" id="press-display">
+            <span class="keys-pressed" id="keys-pressed"></span>
+          </div>
+          <div class="press-browser-note" id="press-browser-note" style="display:none;">
+            ⚠️ Browser intercepted that shortcut. Use the <strong>Flashcard</strong> mode for this one, or try in a different browser.
+          </div>
+          <div class="press-buttons">
+            <button class="btn btn-secondary" id="press-skip">Skip →</button>
+            <button class="btn btn-success" id="press-correct">✅ Got it</button>
+            <button class="btn btn-danger" id="press-wrong">❌ Missed</button>
+          </div>
         </div>
+
         <!-- Flashcard mode: reveal + self-grade -->
         <div id="flashcard-answer" style="display:none;">
           <button class="btn btn-primary reveal-btn" id="reveal-answer">Show Answer</button>
           <div class="answer-reveal" id="answer-reveal" style="display:none;">
             <div class="correct-answer" id="correct-answer"></div>
-            <div class="grade-buttons">
-              <button class="btn btn-danger grade-btn" data-grade="again">😵 Again</button>
-              <button class="btn btn-warning grade-btn" data-grade="hard">🤔 Hard</button>
-              <button class="btn btn-success grade-btn" data-grade="good">😊 Good</button>
-              <button class="btn btn-info grade-btn" data-grade="easy">😎 Easy</button>
-            </div>
-          </div>
-        </div>
-        <!-- Reverse mode: input for action name -->
-        <div id="reverse-input" style="display:none;">
-          <input type="text" id="reverse-answer" placeholder="What action does this do?" autocomplete="off">
-          <button class="btn btn-primary" id="submit-reverse">Submit</button>
-          <div class="reverse-reveal" id="reverse-reveal" style="display:none;">
-            <div class="correct-action" id="correct-action"></div>
             <div class="grade-buttons">
               <button class="btn btn-danger grade-btn" data-grade="again">😵 Again</button>
               <button class="btn btn-warning grade-btn" data-grade="hard">🤔 Hard</button>
@@ -99,8 +96,10 @@
         <div class="result-card"><div class="result-value" id="end-learned">0</div><div class="result-label">Keys Mastered</div></div>
       </div>
       <div id="end-achievements"></div>
-      <button class="btn btn-primary" id="end-practice-more">Practice More</button>
-      <button class="btn btn-secondary" id="end-back-dashboard">Back to Dashboard</button>
+      <div class="end-buttons">
+        <button class="btn btn-primary" id="end-practice-more">Practice More</button>
+        <button class="btn btn-secondary" id="end-back-dashboard">Back to Dashboard</button>
+      </div>
     </div>
   </div>
 
@@ -108,7 +107,30 @@
   <main>
     <!-- Dashboard View -->
     <div id="view-dashboard" class="view active">
-      <div class="dashboard-grid">
+      <!-- Onboarding (first-time only) -->
+      <div id="onboarding" style="display:none;">
+        <div class="card onboarding-card">
+          <h2>👋 Welcome to the PyCharm Keybind Trainer!</h2>
+          <p>Learn every PyCharm shortcut through spaced repetition practice. Here's how it works:</p>
+          <div class="onboarding-steps">
+            <div class="onboarding-step">
+              <div class="step-icon">🎯</div>
+              <div class="step-text"><strong>Press the keys</strong> — When you see an action like "Find action…", physically press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd> on your keyboard.</div>
+            </div>
+            <div class="onboarding-step">
+              <div class="step-icon">🔄</div>
+              <div class="step-text"><strong>Spaced repetition</strong> — Keys you struggle with come back sooner. Mastered keys appear less often. The algorithm learns what you know.</div>
+            </div>
+            <div class="onboarding-step">
+              <div class="step-icon">📊</div>
+              <div class="step-text"><strong>Short sessions</strong> — Practice 5-10 keys at a time. Your progress saves automatically. Come back daily for best results.</div>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-large" id="onboarding-start">Let's Go! 🚀</button>
+        </div>
+      </div>
+
+      <div class="dashboard-grid" id="dashboard-content" style="display:none;">
         <div class="card welcome-card">
           <h2>👋 Welcome Back!</h2>
           <div id="dashboard-greeting"></div>
@@ -123,9 +145,8 @@
         </div>
         <div class="card">
           <h3>🎯 Quick Start</h3>
-          <button class="btn btn-primary" onclick="startPractice('all')">🎮 Practice All</button>
-          <button class="btn btn-secondary" onclick="startSpacedReview()">🔄 Spaced Review</button>
-          <button class="btn btn-secondary" onclick="startPractice('due')">⚡ Practice Due Keys</button>
+          <button class="btn btn-primary quick-btn" onclick="startPractice('all')">🎯 Practice All Keys</button>
+          <button class="btn btn-secondary quick-btn" onclick="startSpacedReview()">🔄 Spaced Review</button>
         </div>
         <div class="card">
           <h3>📈 Mastery Distribution</h3>
@@ -145,18 +166,18 @@
     <!-- Practice View -->
     <div id="view-practice" class="view">
       <div class="practice-setup" id="practice-setup">
-        <h2>🎮 Practice Mode</h2>
+        <h2>🎯 Practice</h2>
+        <p class="setup-subtitle">Pick a category and start pressing keys.</p>
         <div class="setup-grid">
           <div class="card">
-            <h3>Choose Category</h3>
+            <h3>Category</h3>
             <div id="category-buttons" class="button-grid"></div>
           </div>
           <div class="card">
-            <h3>Practice Style</h3>
+            <h3>Mode</h3>
             <div class="style-options">
-              <button class="btn btn-primary style-btn" data-style="flashcard">🃏 Flashcard — See action, recall keybind</button>
-              <button class="btn btn-secondary style-btn" data-style="reverse">🔄 Reverse — See keybind, name the action</button>
-              <button class="btn btn-secondary style-btn" data-style="type">⌨️ Type It — Type the exact keybind</button>
+              <button class="btn btn-primary style-btn active" data-style="press">🎹 Press It — Physically press the keybind</button>
+              <button class="btn btn-secondary style-btn" data-style="flashcard">🃏 Flashcard — See action, recall keybind</button>
             </div>
           </div>
         </div>
@@ -167,15 +188,16 @@
     <div id="view-review" class="view">
       <div id="review-setup">
         <h2>🔄 Spaced Review</h2>
-        <p>Review keys you've learned before — SM-2 algorithm decides what to show next.</p>
+        <p>Review keys on the optimal schedule. The algorithm picks what you need to practice.</p>
         <div class="review-info">
           <div class="card">
-            <h3>Today's Due</h3>
+            <h3>Today</h3>
             <div class="stat-row"><span>Keys to review:</span><span id="due-count">0</span></div>
             <div class="stat-row"><span>Keys due soon:</span><span id="due-soon-count">0</span></div>
+            <div class="stat-row"><span>Total learned:</span><span id="review-total-learned">0</span></div>
           </div>
         </div>
-        <button class="btn btn-primary" id="start-review-btn" onclick="startSpacedReview()">Start Review Session</button>
+        <button class="btn btn-primary" id="start-review-btn">Start Review Session</button>
       </div>
     </div>
 
@@ -212,7 +234,7 @@
     <div id="view-reference" class="view">
       <h2>📖 Keybind Reference</h2>
       <div class="search-bar">
-        <input type="text" id="ref-search" placeholder="Search keybinds...">
+        <input type="text" id="ref-search" placeholder="Search keybinds or actions...">
       </div>
       <div id="reference-list"></div>
     </div>

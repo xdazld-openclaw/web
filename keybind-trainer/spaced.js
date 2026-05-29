@@ -99,14 +99,24 @@ class SpacedRepetition {
   }
 
   // Get keys that are due for review
+  // Includes: never-reviewed keys (always due) + reviewed keys past their due date
   getDueKeys(limit = 20) {
     const now = Date.now();
     const due = KEYBINDS
       .filter(k => {
         const state = this.data.keys[k.id];
-        return state && state.dueDate <= now;
+        // Never reviewed = always due
+        if (!state) return true;
+        return state.dueDate <= now;
       })
-      .sort((a, b) => this.data.keys[a.id].dueDate - this.data.keys[b.id].dueDate);
+      .sort((a, b) => {
+        const aState = this.data.keys[a.id];
+        const bState = this.data.keys[b.id];
+        // Never-reviewed keys sort first (dueDate = 0), then by earliest due
+        const aDue = aState ? aState.dueDate : 0;
+        const bDue = bState ? bState.dueDate : 0;
+        return aDue - bDue;
+      });
     
     return due.slice(0, limit);
   }

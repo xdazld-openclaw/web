@@ -8,24 +8,100 @@ let sessionTotalCount = 0;
 let sessionStreak = 0;
 let sessionXP = 0;
 
+// ============ KEY CAPTURE (Press It mode) ============
+let activeModifiers = { ctrl: false, alt: false, shift: false };
+let pressedKeys = [];
+let keyCaptureActive = false;
+
+function normalizeKey(e) {
+  // Convert event to a key name matching our keybind format
+  if (e.key === 'Control') return null; // skip modifier-only
+  if (e.key === 'Alt') return null;
+  if (e.key === 'Shift') return null;
+  if (e.key === 'Meta') return null;
+  
+  let key = e.key;
+  if (key.length === 1) key = key.toUpperCase();
+  
+  // Map common keys
+  const map = {
+    ' ': 'Space', 'Escape': 'Esc', 'Delete': 'Delete', 'Backspace': 'Backspace',
+    'Enter': 'Enter', 'Tab': 'Tab', 'ArrowUp': 'Up', 'ArrowDown': 'Down',
+    'ArrowLeft': 'Left', 'ArrowRight': 'Right', 'Home': 'Home', 'End': 'End',
+    'PageUp': 'PageUp', 'PageDown': 'PageDown', 'Insert': 'Insert',
+    '`': '`', '~': '`',
+  };
+  if (map[key]) key = map[key];
+  
+  // NumPad keys
+  if (e.code && e.code.startsWith('Numpad')) {
+    const numpadMap = {
+      'Numpad0': 'NumPad0', 'Numpad1': 'NumPad1', 'Numpad2': 'NumPad2',
+      'Numpad3': 'NumPad3', 'Numpad4': 'NumPad4', 'Numpad5': 'NumPad5',
+      'Numpad6': 'NumPad6', 'Numpad7': 'NumPad7', 'Numpad8': 'NumPad8',
+      'Numpad9': 'NumPad9', 'NumpadAdd': 'NumPad+', 'NumpadSubtract': 'NumPad-',
+      'NumpadMultiply': 'NumPad*', 'NumpadDivide': 'NumPad/',
+      'NumpadEnter': 'NumPadEnter',
+    };
+    key = numpadMap[e.code] || key;
+  }
+  
+  return key;
+}
+
+function buildKeybindString() {
+  let parts = [];
+  if (activeModifiers.ctrl) parts.push('Ctrl');
+  if (activeModifiers.alt) parts.push('Alt');
+  if (activeModifiers.shift) parts.push('Shift');
+  if (pressedKeys.length > 0) parts.push(pressedKeys[pressedKeys.length - 1]);
+  return parts.join('+');
+}
+
+function onKeydown(e) {
+  if (!keyCaptureActive || !currentSession || currentSession.style !== 'press') return;
+  
+  // Track modifiers
+  if (e.key === 'Control' || e.key === 'Meta') { activeModifiers.ctrl = true; e.preventDefault(); return; }
+  if (e.key === 'Alt') { activeModifiers.alt = true; e.preventDefault(); return; }
+  if (e.key === 'Shift') { activeModifiers.shift = true; e.preventDefault(); return; }
+  
+  e.preventDefault();
+  
+  const key = normalizeKey(e);
+  if (key) {
+    pressedKeys.push(key);
+    updatePressDisplay();
+  }
+}
+
+function onKeyup(e) {
+  if (e.key === 'Control' || e.key === 'Meta') activeModifiers.ctrl = false;
+  if (e.key === 'Alt') activeModifiers.alt = false;
+  if (e.key === 'Shift') activeModifiers.shift = false;
+}
+
+function updatePressDisplay() {
+  const display = buildKeybindString();
+  document.getElementById('keys-pressed').textContent = display || '...';
+}
+
+document.addEventListener('keydown', onKeydown);
+document.addEventListener('keyup', onKeyup);
+
 // ============ VIEW MANAGEMENT ============
 function switchView(view) {
   currentView = view;
-  
-  // Hide all views, shared session, shared end
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   hideSessionUI();
   
-  // Show target view
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   const target = document.getElementById(`view-${view}`);
   if (target) target.classList.add('active');
   
-  // Update nav
   document.querySelectorAll('.nav-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.view === view);
   });
   
-  // Render view content
   if (view === 'dashboard') renderDashboard();
   if (view === 'practice') resetPractice();
   if (view === 'review') renderReviewSetup();
@@ -37,7 +113,6 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
   btn.addEventListener('click', () => switchView(btn.dataset.view));
 });
 
-// Show shared session UI, hide views
 function showSessionUI() {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById('shared-session').style.display = '';
@@ -50,20 +125,47 @@ function showSessionEnd() {
 }
 
 function hideSessionUI() {
+  keyCaptureActive = false;
   document.getElementById('shared-session').style.display = 'none';
   document.getElementById('shared-session-end').style.display = 'none';
 }
 
+// ============ ONBOARDING ============
+function checkOnboarding() {
+  const hasProgress = SR.data.totalReviews > 0;
+  if (hasProgress) {
+    document.getElementById('onboarding').style.display = 'none';
+    document.getElementById('dashboard-content').style.display = '';
+  } else {
+    document.getElementById('onboarding').style.display = '';
+    document.getElementById('dashboard-content').style.display = 'none';
+  }
+}
+
+document.getElementById('onboarding-start').addEventListener('click', () => {
+  document.getElementById('onboarding').style.display = 'none';
+  document.getElementById('dashboard-content').style.display = '';
+  startPractice('all', 'press');
+});
+
 // ============ DASHBOARD ============
 function renderDashboard() {
+  checkOnboarding();
+  if (SR.data.totalReviews === 0) return;
+  
   const today = SR.getTodayStats();
   const dist = SR.getMasteryDistribution();
   const weakest = SR.getWeakestKeys(5);
+  const dueCount = SR.getDueKeys().length;
+  const totalKeys = KEYBINDS.length;
   
-  // Greeting
+  // Greeting with context
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
-  document.getElementById('dashboard-greeting').innerHTML = `<p>${greeting}! You have <strong>${SR.getDueKeys().length}</strong> keys due for review.</p>`;
+  const greetingMsg = dueCount > 0 
+    ? `${greeting}! You have <strong>${dueCount}</strong> key${dueCount === 1 ? '' : 's'} due for review.`
+    : `${greeting}! ${SR.getKeysLearned()} of ${totalKeys} keys learned. All caught up! 🎉`;
+  document.getElementById('dashboard-greeting').innerHTML = `<p>${greetingMsg}</p>`;
   
   // Today's summary
   document.getElementById('today-time').textContent = getTodayTime();
@@ -109,7 +211,7 @@ function renderDashboard() {
   // Achievements
   const recentAch = SR.data.achievements.slice(-3).reverse();
   if (recentAch.length === 0) {
-    document.getElementById('achievements-list').innerHTML = '<p class="muted">No achievements yet. Start practicing!</p>';
+    document.getElementById('achievements-list').innerHTML = '<p class="muted">Start practicing to earn achievements!</p>';
   } else {
     document.getElementById('achievements-list').innerHTML = recentAch
       .map(id => {
@@ -120,7 +222,7 @@ function renderDashboard() {
   
   // Weakest keys
   if (weakest.length === 0) {
-    document.getElementById('weakest-keys').innerHTML = '<p class="muted">No data yet. Start practicing!</p>';
+    document.getElementById('weakest-keys').innerHTML = '<p class="muted">No data yet.</p>';
   } else {
     document.getElementById('weakest-keys').innerHTML = weakest.map(k => 
       `<div class="weak-key">
@@ -135,23 +237,19 @@ function renderDashboard() {
 function getTodayTime() {
   const sessions = SR.data.sessionHistory;
   if (sessions.length === 0) return '0m';
-  
   let totalSec = 0;
   const today = SR.getTodayKey();
   for (const s of sessions) {
-    if (s.date && s.date.startsWith(today)) {
-      totalSec += s.duration || 0;
-    }
+    if (s.date && s.date.startsWith(today)) totalSec += s.duration || 0;
   }
   return totalSec < 60 ? '0m' : `${Math.round(totalSec / 60)}m`;
 }
 
-// ============ PRACTICE ============
+// ============ PRACTICE SETUP ============
 function resetPractice() {
   document.getElementById('practice-setup').style.display = '';
   hideSessionUI();
   
-  // Build category buttons
   const catContainer = document.getElementById('category-buttons');
   catContainer.innerHTML = '';
   let html = `<button class="btn btn-primary cat-btn" data-category="all">🎯 All (${KEYBINDS.length})</button>`;
@@ -163,21 +261,29 @@ function resetPractice() {
   }
   catContainer.innerHTML = html;
   
-  // Category click handlers
   catContainer.querySelectorAll('.cat-btn').forEach(btn => {
     btn.addEventListener('click', () => startPractice(btn.dataset.category));
   });
   
-  // Style button handlers
   document.querySelectorAll('.style-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      const cat = document.querySelector('.cat-btn.active')?.dataset.category || 'all';
-      startPractice(cat, btn.dataset.style);
+      document.querySelectorAll('.style-btn').forEach(b => {
+        b.classList.remove('btn-primary', 'active');
+        b.classList.add('btn-secondary');
+      });
+      btn.classList.remove('btn-secondary');
+      btn.classList.add('btn-primary', 'active');
     });
   });
 }
 
-function startPractice(category, style = 'flashcard') {
+function startPractice(category, style = null) {
+  // Determine style: use pressed style button, or parameter, or default 'press'
+  if (!style) {
+    const activeStyleBtn = document.querySelector('.style-btn.active');
+    style = activeStyleBtn ? activeStyleBtn.dataset.style : 'press';
+  }
+  
   let keys;
   if (category === 'all') {
     keys = [...KEYBINDS].sort(() => Math.random() - 0.5);
@@ -212,6 +318,10 @@ function startPractice(category, style = 'flashcard') {
   
   showSessionUI();
   document.getElementById('total-cards').textContent = keys.length;
+  
+  // Setup end button
+  document.getElementById('end-session-btn').onclick = () => endSession();
+  
   showCurrentCard();
 }
 
@@ -234,31 +344,79 @@ function showCurrentCard() {
   document.getElementById('card-question').textContent = '';
   document.getElementById('card-hint').textContent = '';
   document.getElementById('answer-reveal').style.display = 'none';
-  document.getElementById('reverse-reveal').style.display = 'none';
   
-  // Reset all input modes
-  document.getElementById('type-input').style.display = 'none';
+  // Reset all modes
+  document.getElementById('press-zone').style.display = 'none';
   document.getElementById('flashcard-answer').style.display = 'none';
-  document.getElementById('reverse-input').style.display = 'none';
+  document.getElementById('press-browser-note').style.display = 'none';
+  pressedKeys = [];
+  activeModifiers = { ctrl: false, alt: false, shift: false };
   
-  if (currentSession.style === 'flashcard') {
+  if (currentSession.style === 'press') {
+    document.getElementById('card-question').textContent = key.action;
+    document.getElementById('press-zone').style.display = '';
+    document.getElementById('keys-pressed').textContent = '';
+    keyCaptureActive = true;
+  } else if (currentSession.style === 'flashcard') {
     document.getElementById('card-question').textContent = key.action;
     document.getElementById('flashcard-answer').style.display = '';
     document.getElementById('reveal-answer').style.display = '';
-  } else if (currentSession.style === 'reverse') {
-    document.getElementById('card-question').textContent = `What does "${key.keybind}" do?`;
-    document.getElementById('reverse-input').style.display = '';
-    document.getElementById('reverse-answer').value = '';
-    setTimeout(() => document.getElementById('reverse-answer').focus(), 50);
-  } else if (currentSession.style === 'type') {
-    document.getElementById('card-question').textContent = key.action;
-    document.getElementById('type-input').style.display = '';
-    document.getElementById('type-answer').value = '';
-    setTimeout(() => document.getElementById('type-answer').focus(), 50);
+    keyCaptureActive = false;
   }
 }
 
-// Flashcard: reveal answer
+// ============ PRESS IT MODE ============
+
+// Check if pressed keybind matches the target
+function checkKeyPress(key, pressed) {
+  if (!pressed) return false;
+  
+  // Normalize both for comparison
+  const normalize = (s) => s.toLowerCase().replace(/\s/g, '').replace(/\+/g, '');
+  
+  // Handle / alternatives in target
+  const alternatives = key.keybind.split('/').map(s => s.trim());
+  
+  // Check if pressed matches any alternative
+  for (const alt of alternatives) {
+    if (normalize(pressed) === normalize(alt)) return true;
+    // Also check if pressed matches one part of a "/" alternative
+    const altParts = alt.split('/').map(s => s.trim());
+    if (altParts.some(p => normalize(pressed) === normalize(p))) return true;
+  }
+  
+  // Fuzzy match for close attempts
+  const target = normalize(key.keybind.split('/')[0].trim());
+  const userInput = normalize(pressed);
+  if (levenshteinSimilarity(target, userInput) > 0.85) return true;
+  
+  return false;
+}
+
+document.getElementById('press-correct').addEventListener('click', () => {
+  if (!currentSession) return;
+  const key = currentSession.keys[currentSession.currentIndex];
+  const pressed = buildKeybindString();
+  const isCorrect = checkKeyPress(key, pressed);
+  handleGrade(isCorrect ? 'good' : 'again');
+});
+
+document.getElementById('press-wrong').addEventListener('click', () => {
+  handleGrade('again');
+});
+
+document.getElementById('press-skip').addEventListener('click', () => {
+  if (!currentSession) return;
+  const key = currentSession.keys[currentSession.currentIndex];
+  SR.initKey(key.id);
+  // Skip: treat as neutral (no XP, no streak change, but still record review)
+  sessionTotalCount++;
+  SR.review(key.id, 'hard');
+  currentSession.currentIndex++;
+  showCurrentCard();
+});
+
+// ============ FLASHCARD MODE ============
 document.getElementById('reveal-answer').addEventListener('click', () => {
   const key = currentSession.keys[currentSession.currentIndex];
   document.getElementById('correct-answer').textContent = key.keybind;
@@ -266,7 +424,6 @@ document.getElementById('reveal-answer').addEventListener('click', () => {
   document.getElementById('reveal-answer').style.display = 'none';
 });
 
-// Grade buttons (event delegation on document)
 document.addEventListener('click', (e) => {
   if (e.target.classList.contains('grade-btn')) {
     handleGrade(e.target.dataset.grade);
@@ -285,7 +442,6 @@ function handleGrade(grade) {
     sessionStreak++;
     if (sessionStreak > sessionBestStreak) sessionBestStreak = sessionStreak;
     
-    // XP calculation
     let xp = grade === 'easy' ? 15 : 10;
     if (sessionStreak >= 10) xp += 5;
     else if (sessionStreak >= 5) xp += 3;
@@ -302,98 +458,17 @@ function handleGrade(grade) {
   showCurrentCard();
 }
 
-// Type mode: submit
-document.getElementById('submit-answer').addEventListener('click', submitTypeAnswer);
-document.getElementById('type-answer').addEventListener('keydown', e => {
-  if (e.key === 'Enter') submitTypeAnswer();
-});
-
-function submitTypeAnswer() {
-  const key = currentSession.keys[currentSession.currentIndex];
-  const userAnswer = document.getElementById('type-answer').value.trim().toLowerCase().replace(/\s/g, '');
-  const correctAnswer = key.keybind.toLowerCase().replace(/\s/g, '');
-  
-  // Handle / alternatives
-  const alternatives = correctAnswer.split('/').map(s => s.trim());
-  const userParts = userAnswer.split('/').map(s => s.trim());
-  
-  let isCorrect = false;
-  
-  // Direct match
-  if (userAnswer === correctAnswer || userParts[0] === alternatives[0]) {
-    isCorrect = true;
-  }
-  
-  // Partial match: user typed one of the alternatives correctly
-  if (!isCorrect && userParts.length === 1 && alternatives.some(a => a === userParts[0])) {
-    isCorrect = true;
-  }
-  
-  // Fuzzy: at least 80% Levenshtein similarity
-  if (!isCorrect && levenshteinSimilarity(userAnswer, correctAnswer) > 0.8) {
-    isCorrect = true;
-  }
-  
-  // Check if user input is a significant portion
-  if (!isCorrect) {
-    if (correctAnswer.includes(userAnswer) || userAnswer.includes(correctAnswer)) {
-      isCorrect = true;
-    }
-  }
-  
-  handleGrade(isCorrect ? 'good' : 'again');
-}
-
-// Reverse mode: submit
-document.getElementById('submit-reverse').addEventListener('click', submitReverseAnswer);
-document.getElementById('reverse-answer').addEventListener('keydown', e => {
-  if (e.key === 'Enter') submitReverseAnswer();
-});
-
-function submitReverseAnswer() {
-  const key = currentSession.keys[currentSession.currentIndex];
-  const userAnswer = document.getElementById('reverse-answer').value.trim().toLowerCase();
-  const correctAction = key.action.toLowerCase().replace(/[…\.?]/g, '').trim();
-  
-  // Check keyword overlap
-  const actionWords = correctAction.split(/\s+/).filter(w => w.length > 2);
-  const userWords = userAnswer.split(/\s+/);
-  
-  let matchCount = 0;
-  for (const w of actionWords) {
-    if (userWords.some(uw => uw.includes(w) || w.includes(uw))) {
-      matchCount++;
-    }
-  }
-  
-  const matchRatio = actionWords.length > 0 ? matchCount / actionWords.length : 0;
-  const isCorrect = matchRatio >= 0.5;
-  
-  document.getElementById('correct-action').textContent = key.action;
-  document.getElementById('reverse-reveal').style.display = '';
-  document.getElementById('submit-reverse').style.display = 'none';
-  
-  // Grade after brief delay so user sees the answer
-  setTimeout(() => {
-    document.getElementById('submit-reverse').style.display = '';
-    handleGrade(isCorrect ? 'good' : 'again');
-  }, 800);
-}
-
 // ============ SESSION END ============
 function endSession() {
   if (!currentSession) return;
   
+  keyCaptureActive = false;
   const duration = Date.now() - sessionStartTime;
   const accuracy = sessionTotalCount > 0 ? Math.round((sessionCorrectCount / sessionTotalCount) * 100) : 0;
   
-  // Record session
   SR.recordSession(currentSession.style, currentSession.category, sessionTotalCount, sessionCorrectCount, sessionXP, duration);
-  
-  // Check achievements
   const newAch = SR.checkAchievements();
   
-  // Show results
   showSessionEnd();
   
   document.getElementById('end-accuracy').textContent = `${accuracy}%`;
@@ -401,13 +476,12 @@ function endSession() {
   document.getElementById('end-streak').textContent = sessionBestStreak;
   document.getElementById('end-learned').textContent = SR.getKeysLearned();
   
-  // Update end buttons based on mode
   const practiceMoreBtn = document.getElementById('end-practice-more');
   if (currentSession.mode === 'review') {
     practiceMoreBtn.textContent = '🔄 Review Again';
     practiceMoreBtn.onclick = () => startSpacedReview();
   } else {
-    practiceMoreBtn.textContent = '🎮 Practice More';
+    practiceMoreBtn.textContent = '🎯 Practice More';
     practiceMoreBtn.onclick = () => switchView('practice');
   }
   
@@ -416,7 +490,7 @@ function endSession() {
   if (newAch.length > 0) {
     document.getElementById('end-achievements').innerHTML = 
       `<div class="new-achievements"><h3>🏅 New Achievements!</h3>${
-        newAch.map(a => `<div class="achievement-badge">${a.name}<br><small>${ach.desc}</small></div>`).join('')
+        newAch.map(a => `<div class="achievement-badge">${a.name}<br><small>${a.desc}</small></div>`).join('')
       }</div>`;
   } else {
     document.getElementById('end-achievements').innerHTML = '';
@@ -429,21 +503,29 @@ function endSession() {
 function renderReviewSetup() {
   const due = SR.getDueKeys();
   const dueSoon = SR.getDueSoonKeys();
+  const learned = SR.getKeysLearned();
   
   document.getElementById('due-count').textContent = due.length;
   document.getElementById('due-soon-count').textContent = dueSoon.length;
+  document.getElementById('review-total-learned').textContent = learned;
   document.getElementById('review-setup').style.display = '';
   hideSessionUI();
 }
+
+document.getElementById('start-review-btn').addEventListener('click', () => startSpacedReview());
 
 function startSpacedReview() {
   const due = SR.getDueKeys(25);
   
   if (due.length === 0) {
-    if (confirm('No keys are due for review. Start a general practice session instead?')) {
-      switchView('practice');
-      setTimeout(() => startPractice('all', 'flashcard'), 100);
-      return;
+    // No keys due — suggest learning new ones
+    if (SR.getKeysLearned() < KEYBINDS.length) {
+      if (confirm('No keys are due for review yet. Practice new keys instead?')) {
+        switchView('practice');
+        setTimeout(() => startPractice('all', 'press'), 100);
+      }
+    } else {
+      alert('You\'re all caught up! Great job! 🎉');
     }
     return;
   }
@@ -451,7 +533,7 @@ function startSpacedReview() {
   currentSession = {
     keys: due,
     currentIndex: 0,
-    style: 'flashcard',
+    style: 'press',
     category: 'spaced-review',
     mode: 'review',
   };
@@ -465,6 +547,7 @@ function startSpacedReview() {
   
   showSessionUI();
   document.getElementById('total-cards').textContent = due.length;
+  document.getElementById('end-session-btn').onclick = () => endSession();
   showCurrentCard();
 }
 
@@ -479,7 +562,6 @@ function renderStats() {
     ? `${Math.round((SR.data.totalCorrect / SR.data.totalReviews) * 100)}%` : '0%';
   document.getElementById('stat-streak').textContent = `${SR.data.currentStreak} days`;
   
-  // Category stats
   const catStats = SR.getCategoryStats();
   let html = '';
   for (const cat of CATEGORIES) {
@@ -497,7 +579,6 @@ function renderStats() {
   }
   document.getElementById('category-stats').innerHTML = html;
   
-  // Weekly chart
   const weekly = SR.getWeeklyActivity();
   let chartHTML = '<div class="weekly-bars">';
   const maxXp = Math.max(...weekly.map(d => d.xp), 1);
@@ -516,7 +597,6 @@ function renderStats() {
   chartHTML += '<div class="weekly-legend"><span class="legend-xp">■ XP</span><span class="legend-rev">■ Reviews</span></div>';
   document.getElementById('weekly-chart').innerHTML = chartHTML;
   
-  // All achievements
   let achHTML = '';
   for (const ach of ACHIEVEMENTS) {
     const unlocked = SR.data.achievements.includes(ach.id);
@@ -572,22 +652,15 @@ document.getElementById('ref-search').addEventListener('input', e => {
 function levenshteinSimilarity(a, b) {
   if (a === b) return 1;
   if (a.length === 0 || b.length === 0) return 0;
-  
   const matrix = Array.from({ length: a.length + 1 }, (_, i) => 
     Array.from({ length: b.length + 1 }, (_, j) => (i === 0 ? j : j === 0 ? i : 0))
   );
-  
   for (let i = 1; i <= a.length; i++) {
     for (let j = 1; j <= b.length; j++) {
       const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-      matrix[i][j] = Math.min(
-        matrix[i - 1][j] + 1,
-        matrix[i][j - 1] + 1,
-        matrix[i - 1][j - 1] + cost
-      );
+      matrix[i][j] = Math.min(matrix[i - 1][j] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j - 1] + cost);
     }
   }
-  
   const maxLen = Math.max(a.length, b.length);
   return 1 - matrix[a.length][b.length] / maxLen;
 }
