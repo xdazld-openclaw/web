@@ -89,6 +89,14 @@ let activeModifiers = { ctrl: false, alt: false, shift: false };
 let pressedKeys = [];
 let keyCaptureActive = false;
 
+// Double Shift detection
+let lastShiftPressTime = 0;
+const DOUBLE_TAP_MS = 500;
+
+function normalizeForCompare(s) {
+  return s.toLowerCase().replace(/\s/g, '').replace(/\+/g, '');
+}
+
 function normalizeKey(e) {
   // Convert event to a key name matching our keybind format
   if (e.key === 'Control') return null; // skip modifier-only
@@ -149,7 +157,35 @@ function onKeydown(e) {
   // Track modifiers
   if (e.key === 'Control' || e.key === 'Meta') { activeModifiers.ctrl = true; e.preventDefault(); return; }
   if (e.key === 'Alt') { activeModifiers.alt = true; e.preventDefault(); return; }
-  if (e.key === 'Shift') { activeModifiers.shift = true; e.preventDefault(); return; }
+  if (e.key === 'Shift') {
+    e.preventDefault();
+    // Double Shift detection: two Shift presses within 500ms
+    const now = Date.now();
+    if (now - lastShiftPressTime < DOUBLE_TAP_MS) {
+      activeModifiers.shift = false; // Clear so buildKeybindString returns just "DoubleShift"
+      pressedKeys.push('DoubleShift');
+      updatePressDisplay();
+      checkAutoAdvance();
+      lastShiftPressTime = 0;
+      return;
+    }
+    lastShiftPressTime = now;
+    // Single Shift: treat as modifier if combined with other keys,
+    // but also allow it as a standalone key (for Shift-only shortcuts)
+    activeModifiers.shift = true;
+    // If target is just "Shift" (no combo), advance immediately
+    const target = currentSession.keys[currentSession.currentIndex];
+    if (target && target.keybind === 'Shift') {
+      activeModifiers.shift = false;
+      pressedKeys.push('Shift');
+      updatePressDisplay();
+      checkAutoAdvance();
+    }
+    return;
+  }
+  
+  // Reset double-shift timer if a non-Shift key is pressed
+  lastShiftPressTime = 0;
   
   e.preventDefault();
   
@@ -157,15 +193,17 @@ function onKeydown(e) {
   if (key) {
     pressedKeys.push(key);
     updatePressDisplay();
-    
-    // Auto-check: did they press the right keybind?
-    const target = currentSession.keys[currentSession.currentIndex];
-    const pressed = buildKeybindString();
-    if (checkKeyPress(target, pressed)) {
-      // Brief flash of green, then advance
-      flashCorrect();
-      setTimeout(() => handleGrade('good', cardRevealed), 300);
-    }
+    checkAutoAdvance();
+  }
+}
+
+function checkAutoAdvance() {
+  if (!currentSession) return;
+  const target = currentSession.keys[currentSession.currentIndex];
+  const pressed = buildKeybindString();
+  if (checkKeyPress(target, pressed)) {
+    flashCorrect();
+    setTimeout(() => handleGrade('good', cardRevealed), 300);
   }
 }
 
