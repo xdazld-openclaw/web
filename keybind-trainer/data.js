@@ -39,7 +39,7 @@ const KEYBINDS = [
   { id: "find_usages_1", category: "Navigate From Symbols", action: "Find usages", keybind: "Alt+F7" },
   { id: "find_usages_2", category: "Navigate From Symbols", action: "Find usages in file", keybind: "Ctrl+F7", kde: true },
   { id: "highlight_usages", category: "Navigate From Symbols", action: "Highlight usages in file", keybind: "Ctrl+Shift+F7" },
-  { id: "show_usages", category: "Navigate From Symbols", action: "Show usages", keybind: "Ctrl+Alt+F7" },
+  { id: "show_usages", category: "Navigate From Symbols", action: "Show usages", keybind: "Ctrl+Alt+F7", linux: true },
 
   // REFACTOR AND CLEAN UP
   { id: "refactor_this", category: "Refactor and Clean Up", action: "Refactor this…", keybind: "Ctrl+Alt+Shift+T" },
@@ -52,7 +52,7 @@ const KEYBINDS = [
   { id: "extract_method", category: "Refactor and Clean Up", action: "Extract method", keybind: "Ctrl+Alt+M" },
   { id: "introduce_var_param_1", category: "Refactor and Clean Up", action: "Introduce variable", keybind: "Ctrl+Alt+V" },
   { id: "introduce_var_param_2", category: "Refactor and Clean Up", action: "parameter", keybind: "Ctrl+Alt+P" },
-  { id: "introduce_field_const_1", category: "Refactor and Clean Up", action: "Introduce field", keybind: "Ctrl+Alt+F" },
+  { id: "introduce_field_const_1", category: "Refactor and Clean Up", action: "Introduce field", keybind: "Ctrl+Alt+F", linux: true },
   { id: "introduce_field_const_2", category: "Refactor and Clean Up", action: "constant", keybind: "Ctrl+Alt+C" },
   { id: "reformat_code", category: "Refactor and Clean Up", action: "Reformat code", keybind: "Ctrl+Alt+L", kde: true },
 
@@ -142,7 +142,7 @@ const KEYBINDS = [
   { id: "smart_step_into", category: "Build, Run, and Debug", action: "Smart step into", keybind: "Shift+F7" },
   { id: "step_out", category: "Build, Run, and Debug", action: "Step out", keybind: "Shift+F8" },
   { id: "run_to_cursor_1", category: "Build, Run, and Debug", action: "Run to cursor", keybind: "Alt+F9" },
-  { id: "run_to_cursor_2", category: "Build, Run, and Debug", action: "Force run to cursor", keybind: "Ctrl+Alt+F9" },
+  { id: "run_to_cursor_2", category: "Build, Run, and Debug", action: "Force run to cursor", keybind: "Ctrl+Alt+F9", linux: true },
   { id: "show_execution", category: "Build, Run, and Debug", action: "Show execution point", keybind: "Alt+F10" },
   { id: "evaluate_expression", category: "Build, Run, and Debug", action: "Evaluate expression…", keybind: "Alt+F8" },
   { id: "stop", category: "Build, Run, and Debug", action: "Stop", keybind: "Ctrl+F2", kde: true },

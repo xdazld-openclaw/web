@@ -35,6 +35,10 @@ function getActiveKeys() {
   let keys = KEYBINDS;
   // Always skip browser-uninterceptable shortcuts (Ctrl+W/T/N, etc.)
   keys = keys.filter(k => !k.conflicts);
+  // Skip Linux TTY-switching shortcuts (Ctrl+Alt+F*) on Linux user agents
+  if (isLinux) {
+    keys = keys.filter(k => !k.linux);
+  }
   // Skip KDE Plasma conflicts if enabled
   if (settings.hideKDE) {
     keys = keys.filter(k => !k.kde);
