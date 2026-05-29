@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2B2D30"/>
+      <stop offset="100%" stop-color="#181A1D"/>
+    </linearGradient>
+  </defs>
+  <!-- Rounded square background -->
+  <rect x="2" y="2" width="28" height="28" rx="7" fill="url(#bg)" stroke="#548af7" stroke-width="2"/>
+  <!-- Keyboard key shape -->
+  <rect x="8" y="10" width="16" height="12" rx="3" fill="none" stroke="#548af7" stroke-width="1.5" opacity="0.9"/>
+  <!-- Modifier dot -->
+  <circle cx="12" cy="16" r="1.5" fill="#73b00a"/>
+  <!-- Letter K -->
+  <path d="M16 12 L16 20 M16 16 L19 13 M16 16 L19 19" stroke="#d4d5d9" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+</svg>
